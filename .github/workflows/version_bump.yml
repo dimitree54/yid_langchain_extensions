@@ -2,7 +2,7 @@ name: 'Bump2version-CI'
 on:
   push:
     branches:
-      - 'develop'
+      - 'main'
 
 jobs:
   bump-version:
