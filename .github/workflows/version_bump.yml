@@ -11,8 +11,7 @@ jobs:
       - name: Bump version
         uses: Clinical-Genomics/bump2version-ci@master
         env:
-          GITHUB_TOKEN: ${{ secrets.BUMPVERSION_TOKEN }}
+          BUMPVERSION_TOKEN: ${{ secrets.BUMPVERSION_TOKEN }}
+          BUMPVERSION_AUTHOR: ${{ AutoBump CI }}
+          BUMPVERSION_EMAIL: ${{ actions@github.com }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_ACTOR: ${{ github.actor }}
-        with:
-          release_pat: ${{ secrets.BUMPVERSION_TOKEN }}
