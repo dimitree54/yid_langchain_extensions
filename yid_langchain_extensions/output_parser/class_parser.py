@@ -18,13 +18,13 @@ def get_classes_description(classes: List[Class]) -> str:
 
 
 def get_classes_summary(classes: List[Class]) -> str:
-    return "; ".join([f"{class_index}({_class.name})" for class_index, _class in enumerate(classes)])
+    return "; ".join([f"{class_index} ({_class.name})" for class_index, _class in enumerate(classes)])
 
 
 class ClassParser(ThoughtsJSONParser):
     extra_thoughts: List[Thought] = []
     action_thoughts: List[Thought] = [
-        Thought(name="class_index", type=int, description="The class chosen. Must be one of [{classes_summary}]"),
+        Thought(name="class_index", type="int", description="The class chosen. Must be one of [{classes_summary}]"),
     ]
 
     @property
