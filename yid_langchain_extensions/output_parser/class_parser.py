@@ -24,7 +24,7 @@ def get_classes_summary(classes: List[Class]) -> str:
 class ClassParser(ThoughtsJSONParser):
     extra_thoughts: List[Thought] = []
     action_thoughts: List[Thought] = [
-        Thought(name="class_index", type=int, description="The class chosen. Must be one of [{classes_summary}]"),
+        Thought(name="class_index", type="int", description="The class chosen. Must be one of [{classes_summary}]"),
     ]
 
     @property
