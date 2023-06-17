@@ -18,7 +18,7 @@ def get_classes_description(classes: List[Class]) -> str:
 
 
 def get_classes_summary(classes: List[Class]) -> str:
-    return "; ".join([f"{class_index}({_class.name})" for class_index, _class in enumerate(classes)])
+    return "; ".join([f"{class_index} ({_class.name})" for class_index, _class in enumerate(classes)])
 
 
 class ClassParser(ThoughtsJSONParser):
