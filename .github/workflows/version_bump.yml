@@ -3,15 +3,16 @@ on:
   push:
     branches:
       - 'develop'
+
 jobs:
   bump-version:
     runs-on: ubuntu-latest
     name: Bump version and push tags to master
     steps:
       - name: Bump version
-        uses: Clinical-Genomics/bump2version-ci@master
+        uses: Clinical-Genomics/bump2version-ci@v3
         env:
           BUMPVERSION_TOKEN: ${{ secrets.BUMPVERSION_TOKEN }}
-          BUMPVERSION_AUTHOR: AutoBump CI
+          BUMPVERSION_AUTHOR: auto_bump_version
           BUMPVERSION_EMAIL: actions@github.com
           GITHUB_REPOSITORY: ${{ github.repository }}
