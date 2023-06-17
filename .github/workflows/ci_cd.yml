@@ -29,7 +29,7 @@ jobs:
         python-version: 3.11
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
+        python -m pip install --upgrade pip setuptools wheel
         pip install -r requirements.txt
     - name: Run unittest
       run: |
@@ -60,7 +60,7 @@ jobs:
           python-version: 3.11
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip twine
+          python -m pip install --upgrade pip setuptools wheel twine
           pip install -r requirements.txt
       - name: Build and publish
         env:
