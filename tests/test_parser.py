@@ -24,6 +24,26 @@ class TestThoughtsJSONParser(unittest.TestCase):
             "thought2": 2
         })
 
+    def test_format_thoughts(self):
+        thoughts = [
+            Thought(name="thought1", description="Thought 1"),
+            Thought(name="thought2", type="int", description="Thought 2")
+        ]
+        thoughts_string = ThoughtsJSONParser(
+            thoughts=thoughts
+        ).format_thoughts()
+        self.assertEqual(thoughts_string, '"thought1": string [Thought 1]\n\t"thought2": int [Thought 2]')
+
+    def test_format_instructions(self):
+        thoughts = [
+            Thought(name="thought1", description="Thought 1"),
+            Thought(name="thought2", type="int", description="Thought 2")
+        ]
+        format_instructions = ThoughtsJSONParser(
+            thoughts=thoughts
+        ).get_format_instructions()
+        self.assertTrue('"thought1": string [Thought 1]\n\t"thought2": int [Thought 2]' in format_instructions)
+
 
 class TestClassParser(unittest.TestCase):
     def setUp(self) -> None:
