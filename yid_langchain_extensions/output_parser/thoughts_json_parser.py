@@ -33,7 +33,7 @@ class ThoughtsJSONParser(BaseOutputParser):
         return v
 
     def parse(self, text: str) -> Dict[str, Any]:
-        if text.endswith("```"):
+        if text.startswith("```json"):
             text += self.stop_sequences[0]
         response = parse_json_markdown(text)
         return response
