@@ -29,6 +29,7 @@ class ThoughtsJSONParser(BaseOutputParser):
     @validator("thoughts")
     def validate_thoughts(cls, v):
         assert len(v) > 0, "You must have at least one thought"
+        return v
 
     def parse(self, text: str) -> Dict[str, Any]:
         text += self.stop_sequences[0]

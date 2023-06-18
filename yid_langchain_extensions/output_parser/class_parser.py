@@ -22,14 +22,13 @@ def get_classes_summary(classes: List[Class]) -> str:
 
 
 class ClassParser(ThoughtsJSONParser):
-    extra_thoughts: List[Thought] = []
-    action_thoughts: List[Thought] = [
-        Thought(name="class_index", type="int", description="The class chosen. Must be one of [{classes_summary}]"),
-    ]
-
-    @property
-    def thoughts(self) -> List[Thought]:
-        return self.action_thoughts + self.extra_thoughts
+    @classmethod
+    def from_extra_thoughts(cls, extra_thoughts: List[Thought]):
+        action_thoughts: List[Thought] = [
+            Thought(name="class_index", type="int", description="The class chosen. Must be one of [{classes_summary}]"),
+        ]
+        thoughts = extra_thoughts + action_thoughts
+        return cls(thoughts=thoughts)
 
     def parse(self, text: str) -> int:
         response = super().parse(text)
