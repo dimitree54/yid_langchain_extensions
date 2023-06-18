@@ -3,7 +3,7 @@ from typing import List, Dict, Any
 
 from langchain import PromptTemplate
 from langchain.schema import BaseOutputParser
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 
 FORMAT_PROMPT = """FORMAT:
 ------
@@ -25,6 +25,11 @@ class Thought(BaseModel):
 class ThoughtsJSONParser(BaseOutputParser):
     stop_sequences: List[str] = ["}\n```", "}```"]
     thoughts: List[Thought] = []
+
+    @validator("thoughts")
+    def validate_thoughts(cls, v):
+        assert len(v) > 0, "You must have at least one thought"
+        return v
 
     def parse(self, text: str) -> Dict[str, Any]:
         text += self.stop_sequences[0]
