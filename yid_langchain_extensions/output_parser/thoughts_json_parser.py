@@ -25,6 +25,7 @@ class Thought(BaseModel):
 class ThoughtsJSONParser(BaseOutputParser):
     thoughts: List[Thought]
     stop_sequences: List[str] = ["}\n```", "}```"]
+    format_prompt: str = FORMAT_PROMPT
 
     @validator("thoughts")
     def validate_thoughts(cls, v):
@@ -43,6 +44,6 @@ class ThoughtsJSONParser(BaseOutputParser):
         ])
 
     def get_format_instructions(self) -> str:
-        format_instructions = PromptTemplate.from_template(FORMAT_PROMPT, template_format="jinja2").format_prompt(
+        format_instructions = PromptTemplate.from_template(self.format_prompt, template_format="jinja2").format_prompt(
             thoughts=self.format_thoughts()).to_string()
         return format_instructions
