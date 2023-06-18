@@ -1,13 +1,13 @@
-import json
 from typing import List, Dict, Any
 
 from langchain import PromptTemplate
+from langchain.output_parsers.json import parse_json_markdown
 from langchain.schema import BaseOutputParser
 from pydantic import BaseModel, validator
 
-FORMAT_PROMPT = """FORMAT:
+FORMAT_PROMPT = """RESPONSE FORMAT:
 ------
-You response should be in the following format:
+You response should be a markdown code snippet formatted in the following schema:
 
 ```json
 {
@@ -25,6 +25,7 @@ class Thought(BaseModel):
 class ThoughtsJSONParser(BaseOutputParser):
     thoughts: List[Thought]
     stop_sequences: List[str] = ["}\n```", "}```"]
+    format_prompt: str = FORMAT_PROMPT
 
     @validator("thoughts")
     def validate_thoughts(cls, v):
@@ -32,20 +33,9 @@ class ThoughtsJSONParser(BaseOutputParser):
         return v
 
     def parse(self, text: str) -> Dict[str, Any]:
-        text += self.stop_sequences[0]
-        cleaned_output = text.strip()
-        if "```json" in cleaned_output:
-            _, cleaned_output = cleaned_output.split("```json")
-        if "```" in cleaned_output:
-            cleaned_output, _ = cleaned_output.split("```")
-        if cleaned_output.startswith("```json"):
-            cleaned_output = cleaned_output[len("```json"):]
-        if cleaned_output.startswith("```"):
-            cleaned_output = cleaned_output[len("```"):]
-        if cleaned_output.endswith("```"):
-            cleaned_output = cleaned_output[: -len("```")]
-        cleaned_output = cleaned_output.strip()
-        response = json.loads(cleaned_output)
+        if text.startswith("```json"):
+            text += self.stop_sequences[0]
+        response = parse_json_markdown(text)
         return response
 
     def format_thoughts(self) -> str:
@@ -54,6 +44,6 @@ class ThoughtsJSONParser(BaseOutputParser):
         ])
 
     def get_format_instructions(self) -> str:
-        format_instructions = PromptTemplate.from_template(FORMAT_PROMPT, template_format="jinja2").format_prompt(
+        format_instructions = PromptTemplate.from_template(self.format_prompt, template_format="jinja2").format_prompt(
             thoughts=self.format_thoughts()).to_string()
         return format_instructions
