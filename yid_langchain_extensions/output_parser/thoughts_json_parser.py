@@ -23,8 +23,8 @@ class Thought(BaseModel):
 
 
 class ThoughtsJSONParser(BaseOutputParser):
+    thoughts: List[Thought]
     stop_sequences: List[str] = ["}\n```", "}```"]
-    thoughts: List[Thought] = []
 
     @validator("thoughts")
     def validate_thoughts(cls, v):
