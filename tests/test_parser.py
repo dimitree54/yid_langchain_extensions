@@ -1,7 +1,5 @@
 import unittest
 
-from langchain.schema import AgentAction
-
 from yid_langchain_extensions.output_parser.action_parser import ActionParser
 from yid_langchain_extensions.output_parser.class_parser import Class, get_classes_description, get_classes_summary, \
     ClassParser
