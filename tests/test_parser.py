@@ -11,7 +11,7 @@ from yid_langchain_extensions.output_parser.thoughts_json_parser import Thoughts
 class TestThoughtsJSONParser(unittest.TestCase):
     def test_parse(self):
         parser = ThoughtsJSONParser(
-            extra_thoughts=[
+            thoughts=[
                 Thought(name="thought1", description="Thought 1"),
                 Thought(name="thought2", type="int", description="Thought 2")
             ]
@@ -67,7 +67,7 @@ class TestClassParser(unittest.TestCase):
         self.assertEqual(get_classes_summary(self.classes), "0 (class1); 1 (class2)")
 
     def test_class_parser(self):
-        class_parser = ClassParser(extra_thoughts=[
+        class_parser = ClassParser.from_extra_thoughts(extra_thoughts=[
             Thought(name="thought1", description="Thought 1")
         ])
         string_to_parse = """```json
@@ -89,7 +89,7 @@ class TestClassParser(unittest.TestCase):
 
 class TestActionParser(unittest.TestCase):
     def test_class_parser(self):
-        class_parser = ActionParser(extra_thoughts=[
+        class_parser = ActionParser.from_extra_thoughts(extra_thoughts=[
             Thought(name="thought1", description="Thought 1")
         ])
         string_to_parse = """```json
