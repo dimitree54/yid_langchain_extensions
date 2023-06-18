@@ -9,7 +9,7 @@ class ActionParser(ThoughtsJSONParser):
     @classmethod
     def from_extra_thoughts(cls, extra_thoughts: List[Thought]):
         action_thoughts: List[Thought] = [
-            Thought(name="action", description="The action to take. Must be one of [{tool_names}]"),
+            Thought(name="action", description="The action to take. Must be one of [{{tool_names}}]"),
             Thought(name="action_input", description="The input to the action")
         ]
         thoughts = extra_thoughts + action_thoughts

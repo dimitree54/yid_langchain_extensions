@@ -1,5 +1,7 @@
 import unittest
 
+from pydantic import ValidationError
+
 from yid_langchain_extensions.output_parser.action_parser import ActionParser
 from yid_langchain_extensions.output_parser.class_parser import Class, get_classes_description, get_classes_summary, \
     ClassParser
@@ -9,7 +11,7 @@ from yid_langchain_extensions.output_parser.thoughts_json_parser import Thoughts
 class TestThoughtsJSONParser(unittest.TestCase):
     def test_parse(self):
         parser = ThoughtsJSONParser(
-            extra_thoughts=[
+            thoughts=[
                 Thought(name="thought1", description="Thought 1"),
                 Thought(name="thought2", type="int", description="Thought 2")
             ]
@@ -45,6 +47,10 @@ class TestThoughtsJSONParser(unittest.TestCase):
         ).get_format_instructions()
         self.assertTrue('"thought1": string [Thought 1]\n\t"thought2": int [Thought 2]' in format_instructions)
 
+    def test_raise_without_thoughts(self):
+        with self.assertRaises(ValidationError):
+            ThoughtsJSONParser(thoughts=[])
+
 
 class TestClassParser(unittest.TestCase):
     def setUp(self) -> None:
@@ -61,7 +67,7 @@ class TestClassParser(unittest.TestCase):
         self.assertEqual(get_classes_summary(self.classes), "0 (class1); 1 (class2)")
 
     def test_class_parser(self):
-        class_parser = ClassParser(extra_thoughts=[
+        class_parser = ClassParser.from_extra_thoughts(extra_thoughts=[
             Thought(name="thought1", description="Thought 1")
         ])
         string_to_parse = """```json
@@ -83,7 +89,7 @@ class TestClassParser(unittest.TestCase):
 
 class TestActionParser(unittest.TestCase):
     def test_class_parser(self):
-        class_parser = ActionParser(extra_thoughts=[
+        class_parser = ActionParser.from_extra_thoughts(extra_thoughts=[
             Thought(name="thought1", description="Thought 1")
         ])
         string_to_parse = """```json
