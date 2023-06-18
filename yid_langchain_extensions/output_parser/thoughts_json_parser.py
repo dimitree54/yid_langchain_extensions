@@ -5,9 +5,9 @@ from langchain.output_parsers.json import parse_json_markdown
 from langchain.schema import BaseOutputParser
 from pydantic import BaseModel, validator
 
-FORMAT_PROMPT = """FORMAT:
+FORMAT_PROMPT = """RESPONSE FORMAT:
 ------
-You response should be in the following format:
+You response should be a markdown code snippet formatted in the following schema:
 
 ```json
 {
