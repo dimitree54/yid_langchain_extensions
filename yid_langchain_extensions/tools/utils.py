@@ -16,3 +16,7 @@ def format_tools(tools: List[BaseTool]) -> str:
     return PromptTemplate.from_template(TOOLS_PROMPT).format_prompt(
         tools=tools_string
     ).to_string()
+
+
+def format_tool_names(tools: List[BaseTool]) -> str:
+    return ", ".join([tool.name for tool in tools])

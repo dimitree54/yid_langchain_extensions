@@ -1,11 +1,12 @@
 from typing import List
 
+from langchain.agents import AgentOutputParser
 from langchain.schema import AgentAction
 
 from yid_langchain_extensions.output_parser.thoughts_json_parser import Thought, ThoughtsJSONParser
 
 
-class ActionParser(ThoughtsJSONParser):
+class ActionParser(ThoughtsJSONParser, AgentOutputParser):
     @classmethod
     def from_extra_thoughts(cls, extra_thoughts: List[Thought]):
         action_thoughts: List[Thought] = [
