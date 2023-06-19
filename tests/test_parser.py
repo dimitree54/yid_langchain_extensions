@@ -51,6 +51,21 @@ class TestThoughtsJSONParser(unittest.TestCase):
         with self.assertRaises(ValidationError):
             ThoughtsJSONParser(thoughts=[])
 
+    def test_code_block(self):
+        parser = ThoughtsJSONParser(
+            thoughts=[
+                Thought(name="action", description="action"),
+                Thought(name="action_input", description="action_input")
+            ]
+        )
+        string_to_parse = '''```json
+        {
+            "action": "Final Answer",
+                "action_input": "Example:\\n```python\\nimport cv2\\n```\\n"
+                '''
+        parsed = parser.parse(string_to_parse)
+        self.assertEqual(parsed["action_input"], "Example:\n```python\nimport cv2\n```\n")
+
 
 class TestClassParser(unittest.TestCase):
     def setUp(self) -> None:

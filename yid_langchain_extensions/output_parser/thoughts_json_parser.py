@@ -1,7 +1,7 @@
+import json
 from typing import List, Dict, Any
 
 from langchain import PromptTemplate
-from langchain.output_parsers.json import parse_json_markdown
 from langchain.schema import BaseOutputParser
 from pydantic import BaseModel, validator
 
@@ -35,7 +35,19 @@ class ThoughtsJSONParser(BaseOutputParser):
     def parse(self, text: str) -> Dict[str, Any]:
         if text.startswith("```json"):
             text += self.stop_sequences[0]
-        response = parse_json_markdown(text)
+        cleaned_output = text.strip()
+        if "```json" in cleaned_output:
+            cleaned_output = cleaned_output[cleaned_output.find("```json") + len("```json"):]
+        if "```" in cleaned_output:
+            cleaned_output = cleaned_output[:cleaned_output.rfind("```")]
+        if cleaned_output.startswith("```json"):
+            cleaned_output = cleaned_output[len("```json"):]
+        if cleaned_output.startswith("```"):
+            cleaned_output = cleaned_output[len("```"):]
+        if cleaned_output.endswith("```"):
+            cleaned_output = cleaned_output[: -len("```")]
+        cleaned_output = cleaned_output.strip()
+        response = json.loads(cleaned_output)
         return response
 
     def format_thoughts(self) -> str:
