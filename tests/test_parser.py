@@ -58,7 +58,11 @@ class TestThoughtsJSONParser(unittest.TestCase):
                 Thought(name="action_input", description="action_input")
             ]
         )
-        string_to_parse = '```json\n{\n    "action": "Final Answer",\n    "action_input": "Example:\\n```python\\nimport cv2\\n```\\n"\n'
+        string_to_parse = '''```json
+        {
+            "action": "Final Answer",
+                "action_input": "Example:\\n```python\\nimport cv2\\n```\\n"
+                '''
         parsed = parser.parse(string_to_parse)
         self.assertEqual(parsed["action_input"], "Example:\n```python\nimport cv2\n```\n")
 
