@@ -22,6 +22,19 @@ class Thought(BaseModel):
     type: str = "string"
 
 
+def escape_new_lines_in_json_values(json_string: str) -> str:
+    result = ""
+    i_am_inside_quotes = False
+    for v in json_string:
+        if v == '"':
+            i_am_inside_quotes = not i_am_inside_quotes
+        if v == "\n" and i_am_inside_quotes:
+            result += "\\n"
+        else:
+            result += v
+    return result
+
+
 class ThoughtsJSONParser(BaseOutputParser):
     thoughts: List[Thought]
     stop_sequences: List[str] = ["}\n```", "}```"]
@@ -34,10 +47,11 @@ class ThoughtsJSONParser(BaseOutputParser):
 
     def parse(self, text: str) -> Dict[str, Any]:
         cleaned_output = text.strip()
-        cleaned_output += "}"
         if "```json" in cleaned_output:
             cleaned_output = cleaned_output[cleaned_output.find("```json") + len("```json"):]
+            cleaned_output += "}"
         cleaned_output = cleaned_output.strip()
+        cleaned_output = escape_new_lines_in_json_values(cleaned_output)
         response = json.loads(cleaned_output)
         return response
 
