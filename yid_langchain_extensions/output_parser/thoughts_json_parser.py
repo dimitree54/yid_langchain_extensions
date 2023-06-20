@@ -34,6 +34,7 @@ class ThoughtsJSONParser(BaseOutputParser):
 
     def parse(self, text: str) -> Dict[str, Any]:
         cleaned_output = text.strip()
+        cleaned_output += "}"
         if "```json" in cleaned_output:
             cleaned_output = cleaned_output[cleaned_output.find("```json") + len("```json"):]
         cleaned_output = cleaned_output.strip()

@@ -15,8 +15,8 @@ from yid_langchain_extensions.tools.utils import format_tools
 class TestThoughtsJSONParser(unittest.TestCase):
     def test_simple_agent(self):
         answers = [
-            '{\n\t"action": "check_weather",\n\t"action_input": "Moscow"\n}',
-            '{\n\t"action": "final_answer",\n\t"action_input": "In Moscow rainy with a temperature of 10°C."\n}'
+            '```json\n{\n\t"action": "check_weather",\n\t"action_input": "Moscow"\n',
+            '```json\n{\n\t"action": "final_answer",\n\t"action_input": "In Moscow rainy with a temperature of 10°C."\n'
         ]
         llm = FakeListLLM(responses=answers)
         weather_tool = Tool(
