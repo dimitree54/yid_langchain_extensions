@@ -27,6 +27,21 @@ class TestThoughtsJSONParser(unittest.TestCase):
             "thought2": 2
         })
 
+    def test_parse_without_json(self):
+        parser = ThoughtsJSONParser(
+            thoughts=[
+                Thought(name="thought1", description="Thought 1")
+            ]
+        )
+        string_to_parse = """{
+    "thought1": "thought 1"
+}
+"""
+        parsed = parser.parse(string_to_parse)
+        self.assertEqual(parsed, {
+            "thought1": "thought 1"
+        })
+
     def test_format_thoughts(self):
         thoughts = [
             Thought(name="thought1", description="Thought 1"),
