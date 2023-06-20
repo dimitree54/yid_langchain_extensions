@@ -2,7 +2,6 @@ import unittest
 
 from langchain import PromptTemplate
 from langchain.agents import AgentExecutor
-from langchain.chat_models import ChatOpenAI
 from langchain.llms import FakeListLLM
 from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate, MessagesPlaceholder
 from langchain.schema import SystemMessage

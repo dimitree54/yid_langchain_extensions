@@ -4,7 +4,7 @@ from langchain import BasePromptTemplate, LLMChain
 from langchain.agents import Agent, AgentOutputParser
 from langchain.base_language import BaseLanguageModel
 from langchain.prompts import ChatPromptTemplate
-from langchain.schema import AgentAction, BaseMessage, AIMessage, HumanMessage, FunctionMessage
+from langchain.schema import AgentAction, BaseMessage, AIMessage, FunctionMessage
 from langchain.tools import BaseTool
 
 
