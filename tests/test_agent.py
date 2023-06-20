@@ -8,7 +8,7 @@ from langchain.tools import Tool
 
 from yid_langchain_extensions.agent.simple_agent import SimpleAgent
 from yid_langchain_extensions.output_parser.action_parser import ActionParser
-from yid_langchain_extensions.tools.utils import format_tools, format_tool_names
+from yid_langchain_extensions.tools.utils import format_tools, format_tool_names, FinalAnswerTool
 
 
 class TestThoughtsJSONParser(unittest.TestCase):
@@ -22,11 +22,7 @@ class TestThoughtsJSONParser(unittest.TestCase):
             name="check_weather", description="Use it to check weather at some location",
             func=lambda x: "Rain, 10 C"
         )
-        final_answer_tool = Tool(
-            name="final_answer",
-            description="Use this if you want to respond directly to the human.",
-            func=lambda x: x, return_direct=True
-        )
+        final_answer_tool = FinalAnswerTool()
         tools = [weather_tool, final_answer_tool]
         output_parser = ActionParser.from_extra_thoughts([])
         template = ChatPromptTemplate.from_messages(

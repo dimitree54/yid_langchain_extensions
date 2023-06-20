@@ -20,3 +20,15 @@ def format_tools(tools: List[BaseTool]) -> str:
 
 def format_tool_names(tools: List[BaseTool]) -> str:
     return ", ".join([tool.name for tool in tools])
+
+
+class FinalAnswerTool(BaseTool):
+    name: str = "final_answer"
+    description: str = "Use this if you want to respond directly to the human."
+    return_direct: bool = True
+
+    def _run(self, action_input: str) -> str:
+        return action_input
+
+    async def _arun(self, action_input: str) -> str:
+        return action_input
