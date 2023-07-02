@@ -7,6 +7,8 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.schema import AgentAction, BaseMessage, AIMessage, FunctionMessage
 from langchain.tools import BaseTool
 
+from yid_langchain_extensions.agent.raw_output_agent_executor import RawOutputAgentExecutor
+
 
 class SimpleAgent(Agent):
     prompt: ChatPromptTemplate
@@ -52,5 +54,5 @@ class SimpleAgent(Agent):
     def _get_default_output_parser(cls, **kwargs: Any) -> AgentOutputParser:
         raise NotImplementedError
 
-    def get_executor(self, tools: List[BaseTool], **kwargs: Any) -> AgentExecutor:
-        return AgentExecutor(agent=self, tools=tools, **kwargs)
+    def get_executor(self, tools: List[BaseTool], **kwargs: Any) -> RawOutputAgentExecutor:
+        return RawOutputAgentExecutor(agent=self, tools=tools, **kwargs)
