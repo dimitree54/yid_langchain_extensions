@@ -42,6 +42,22 @@ class TestThoughtsJSONParser(unittest.TestCase):
             "thought1": "thought 1"
         })
 
+    def test_unpaired_brackets(self):
+        parser = ThoughtsJSONParser(
+            thoughts=[
+                Thought(name="thought1", description="Thought 1")
+            ]
+        )
+        string_to_parse = """```json
+{
+    "thought1": "thought 1"
+}
+"""
+        parsed = parser.parse(string_to_parse)
+        self.assertEqual(parsed, {
+            "thought1": "thought 1"
+        })
+
     def test_parse_multi_line_value(self):
         parser = ThoughtsJSONParser(
             thoughts=[
