@@ -1,8 +1,8 @@
-from typing import Optional, Any, Dict
+from typing import Optional, Any, Dict, Tuple
 
 from langchain.agents import AgentExecutor
 from langchain.callbacks.manager import CallbackManagerForChainRun, AsyncCallbackManagerForChainRun
-from langchain.schema import AgentFinish
+from langchain.schema import AgentFinish, AgentAction
 
 
 class RawOutputAgentExecutor(AgentExecutor):
@@ -24,4 +24,12 @@ class RawOutputAgentExecutor(AgentExecutor):
     ) -> Dict[str, Any]:
         result = await super()._areturn(output, intermediate_steps, run_manager)
         result["raw_output"] = output.log
+        return result
+
+    def _get_tool_return(
+        self, next_step_output: Tuple[AgentAction, str]
+    ) -> Optional[AgentFinish]:
+        result = super()._get_tool_return(next_step_output)
+        if result is AgentFinish:
+            result.log = next_step_output[0].log
         return result
