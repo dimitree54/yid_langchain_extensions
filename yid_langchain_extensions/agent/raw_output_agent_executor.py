@@ -30,6 +30,6 @@ class RawOutputAgentExecutor(AgentExecutor):
         self, next_step_output: Tuple[AgentAction, str]
     ) -> Optional[AgentFinish]:
         result = super()._get_tool_return(next_step_output)
-        if result is AgentFinish:
+        if isinstance(result, AgentFinish):
             result.log = next_step_output[0].log
         return result
