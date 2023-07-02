@@ -35,6 +35,13 @@ def escape_new_lines_in_json_values(json_string: str) -> str:
     return result
 
 
+def close_all_curly_brackets(json_string: str) -> str:
+    result = json_string
+    num_brackets_to_close = json_string.count("{") - json_string.count("}")
+    result += "}" * num_brackets_to_close
+    return result
+
+
 class ThoughtsJSONParser(BaseOutputParser):
     thoughts: List[Thought]
     stop_sequences: List[str] = ["}\n```", "}```"]
@@ -49,9 +56,9 @@ class ThoughtsJSONParser(BaseOutputParser):
         cleaned_output = text.strip()
         if "```json" in cleaned_output:
             cleaned_output = cleaned_output[cleaned_output.find("```json") + len("```json"):]
-            cleaned_output += "}"
         cleaned_output = cleaned_output.strip()
         cleaned_output = escape_new_lines_in_json_values(cleaned_output)
+        cleaned_output = close_all_curly_brackets(cleaned_output)
         response = json.loads(cleaned_output)
         return response
 
