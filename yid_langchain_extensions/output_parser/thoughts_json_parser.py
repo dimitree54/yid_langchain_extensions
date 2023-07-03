@@ -52,14 +52,28 @@ class ThoughtsJSONParser(BaseOutputParser):
         assert len(v) > 0, "You must have at least one thought"
         return v
 
+    @staticmethod
+    def fix_json_md_snippet(text: str) -> str:
+        fixed_json = text.strip()
+        fixed_json = escape_new_lines_in_json_values(fixed_json)
+        fixed_json = close_all_curly_brackets(fixed_json)
+        if "```json" in fixed_json:
+            fixed_json = fixed_json[fixed_json.find("```json"):]
+        else:
+            fixed_json = "```json\n" + fixed_json
+        if not fixed_json.endswith("```"):
+            fixed_json += "\n```"
+        return fixed_json
+
+    @staticmethod
+    def strip_json_from_md_snippet(json_md_snippet: str) -> str:
+        cleaned_text = json_md_snippet[len("```json"): -len("```")]
+        return cleaned_text
+
     def parse(self, text: str) -> Dict[str, Any]:
-        cleaned_output = text.strip()
-        if "```json" in cleaned_output:
-            cleaned_output = cleaned_output[cleaned_output.find("```json") + len("```json"):]
-        cleaned_output = cleaned_output.strip()
-        cleaned_output = escape_new_lines_in_json_values(cleaned_output)
-        cleaned_output = close_all_curly_brackets(cleaned_output)
-        response = json.loads(cleaned_output)
+        fixed_json_md_snippet = self.fix_json_md_snippet(text)
+        cleaned_json = self.strip_json_from_md_snippet(fixed_json_md_snippet)
+        response = json.loads(cleaned_json)
         return response
 
     def format_thoughts(self) -> str:

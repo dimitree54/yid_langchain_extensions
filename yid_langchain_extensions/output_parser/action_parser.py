@@ -18,4 +18,5 @@ class ActionParser(ThoughtsJSONParser, AgentOutputParser):
 
     def parse(self, text: str) -> AgentAction:
         response = super().parse(text)
-        return AgentAction(response["action"], response["action_input"], text)
+        fixed_text = self.fix_json_md_snippet(text)
+        return AgentAction(response["action"], response["action_input"], fixed_text)
