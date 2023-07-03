@@ -38,7 +38,7 @@ def escape_new_lines_in_json_values(json_string: str) -> str:
 def close_all_curly_brackets(json_string: str) -> str:
     result = json_string
     num_brackets_to_close = json_string.count("{") - json_string.count("}")
-    result += "}" * num_brackets_to_close
+    result += "\n}" * num_brackets_to_close
     return result
 
 

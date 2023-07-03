@@ -28,7 +28,7 @@ class TestThoughtsJSONParser(TestCase):
     "thought1": "thought 1",
     "thought2": 2"""
         fixed = ThoughtsJSONParser.fix_json_md_snippet(text)
-        self.assertEqual(fixed.replace('\n', ''), self.json_md_snippet.replace('\n', ''))
+        self.assertEqual(fixed, self.json_md_snippet)
 
     def test_fix_json_md_snippet2(self):
         text = """```json
@@ -49,7 +49,7 @@ class TestThoughtsJSONParser(TestCase):
     "thought1": "thought 1",
     "thought2": 2"""
         fixed = ThoughtsJSONParser.fix_json_md_snippet(text)
-        self.assertEqual(fixed.replace('\n', ''), self.json_md_snippet.replace('\n', ''))
+        self.assertEqual(fixed, self.json_md_snippet)
 
     def test_fix_json_md_snippet5(self):
         text = """
