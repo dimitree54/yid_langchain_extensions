@@ -163,6 +163,7 @@ class TestActionParser(unittest.TestCase):
         action = class_parser.parse(string_to_parse)
         self.assertEqual(action.tool, "action 1")
         self.assertEqual(action.tool_input, "action input")
+        self.assertEqual(action.log, string_to_parse + "}\n```")
 
     def test_extra_thoughts(self):
         extra_thoughts = [

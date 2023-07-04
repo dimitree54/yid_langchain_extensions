@@ -5,6 +5,9 @@ from langchain import PromptTemplate
 from langchain.schema import BaseOutputParser
 from pydantic import BaseModel, validator
 
+from yid_langchain_extensions.output_parser.utils import strip_json_from_md_snippet, escape_new_lines_in_json_values, \
+    close_all_curly_brackets
+
 FORMAT_PROMPT = """RESPONSE FORMAT:
 ------
 You response should be a markdown code snippet formatted in the following schema:
@@ -20,26 +23,6 @@ class Thought(BaseModel):
     name: str
     description: str
     type: str = "string"
-
-
-def escape_new_lines_in_json_values(json_string: str) -> str:
-    result = ""
-    i_am_inside_quotes = False
-    for v in json_string:
-        if v == '"':
-            i_am_inside_quotes = not i_am_inside_quotes
-        if v == "\n" and i_am_inside_quotes:
-            result += "\\n"
-        else:
-            result += v
-    return result
-
-
-def close_all_curly_brackets(json_string: str) -> str:
-    result = json_string
-    num_brackets_to_close = json_string.count("{") - json_string.count("}")
-    result += "\n}" * num_brackets_to_close
-    return result
 
 
 class ThoughtsJSONParser(BaseOutputParser):
@@ -65,14 +48,9 @@ class ThoughtsJSONParser(BaseOutputParser):
             fixed_json += "\n```"
         return fixed_json
 
-    @staticmethod
-    def strip_json_from_md_snippet(json_md_snippet: str) -> str:
-        cleaned_text = json_md_snippet[len("```json"): -len("```")]
-        return cleaned_text
-
     def parse(self, text: str) -> Dict[str, Any]:
         fixed_json_md_snippet = self.fix_json_md_snippet(text)
-        cleaned_json = self.strip_json_from_md_snippet(fixed_json_md_snippet)
+        cleaned_json = strip_json_from_md_snippet(fixed_json_md_snippet)
         response = json.loads(cleaned_json)
         return response
 

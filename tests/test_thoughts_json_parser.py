@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from yid_langchain_extensions.output_parser.thoughts_json_parser import ThoughtsJSONParser
+from yid_langchain_extensions.output_parser.utils import strip_json_from_md_snippet
 
 
 class TestThoughtsJSONParser(TestCase):
@@ -19,7 +20,7 @@ class TestThoughtsJSONParser(TestCase):
     "thought2": 2
 }
 """
-        cleaned_text = ThoughtsJSONParser.strip_json_from_md_snippet(self.json_md_snippet)
+        cleaned_text = strip_json_from_md_snippet(self.json_md_snippet)
         self.assertEqual(cleaned_text, stripped_text)
 
     def test_fix_json_md_snippet1(self):
