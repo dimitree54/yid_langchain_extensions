@@ -5,7 +5,7 @@ with open('requirements.txt') as f:
 
 setup(
     name='yid_langchain_extensions',
-    version='0.4.22',
+    version='0.4.23',
     author='Dmitrii Rashchenko',
     author_email='dimitree54@gmail.com',
     packages=find_packages(),
