@@ -48,11 +48,15 @@ class ThoughtsJSONParser(BaseOutputParser):
             fixed_json += "\n```"
         return fixed_json
 
-    def parse(self, text: str) -> Dict[str, Any]:
-        fixed_json_md_snippet = self.fix_json_md_snippet(text)
-        cleaned_json = strip_json_from_md_snippet(fixed_json_md_snippet)
+    @staticmethod
+    def parse_json_md_snippet(json_md_snippet: str) -> Dict[str, Any]:
+        cleaned_json = strip_json_from_md_snippet(json_md_snippet)
         response = json.loads(cleaned_json)
         return response
+
+    def parse(self, text: str) -> Dict[str, Any]:
+        fixed_json_md_snippet = self.fix_json_md_snippet(text)
+        return self.parse_json_md_snippet(fixed_json_md_snippet)
 
     def format_thoughts(self) -> str:
         return "\n\t".join([
