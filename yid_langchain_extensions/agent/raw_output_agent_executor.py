@@ -1,38 +1,23 @@
-from typing import Optional, Any, Dict, Tuple
+from typing import Optional, Tuple
 
 from langchain.agents import AgentExecutor
-from langchain.callbacks.manager import CallbackManagerForChainRun, AsyncCallbackManagerForChainRun
 from langchain.schema import AgentFinish, AgentAction
 
+from yid_langchain_extensions.output_parser.action_parser import ActionWithThoughts
 
-class RawOutputAgentExecutor(AgentExecutor):
-    def _return(
-        self,
-        output: AgentFinish,
-        intermediate_steps: list,
-        run_manager: Optional[CallbackManagerForChainRun] = None,
-    ) -> Dict[str, Any]:
-        result = super()._return(output, intermediate_steps, run_manager)
-        result["raw_output"] = output.log
-        return result
 
-    async def _areturn(
-        self,
-        output: AgentFinish,
-        intermediate_steps: list,
-        run_manager: Optional[AsyncCallbackManagerForChainRun] = None,
-    ) -> Dict[str, Any]:
-        result = await super()._areturn(output, intermediate_steps, run_manager)
-        result["raw_output"] = output.log
-        return result
-
+class AgentWithThoughtsExecutor(AgentExecutor):
     def _get_tool_return(
         self, next_step_output: Tuple[AgentAction, str]
     ) -> Optional[AgentFinish]:
-        result = super()._get_tool_return(next_step_output)
-        if isinstance(result, AgentFinish):
+        agent_action, observation = next_step_output
+        name_to_tool_map = {tool.name: tool for tool in self.tools}
+        if agent_action.tool in name_to_tool_map and name_to_tool_map[agent_action.tool].return_direct:
+            return_values = {self.agent.return_values[0]: observation}
+            if isinstance(agent_action, ActionWithThoughts):
+                return_values.update(agent_action.all_thoughts)
             return AgentFinish(
-                return_values=result.return_values,
-                log=next_step_output[0].log
+                return_values,
+                agent_action.log
             )
-        return result
+        return None

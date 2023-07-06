@@ -11,8 +11,8 @@ from yid_langchain_extensions.output_parser.action_parser import ActionParser
 from yid_langchain_extensions.tools.utils import format_tools, format_tool_names, FinalAnswerTool
 
 
-class TestThoughtsJSONParser(unittest.TestCase):
-    def test_simple_agent(self):
+class TestSimpleAgent(unittest.TestCase):
+    def test_run(self):
         answers = [
             '```json\n{\n\t"action": "check_weather",\n\t"action_input": "Moscow"\n',
             '```json\n{\n\t"action": "final_answer",\n\t"action_input": "In Moscow rainy with a temperature of 10°C."\n'
@@ -24,7 +24,7 @@ class TestThoughtsJSONParser(unittest.TestCase):
         )
         final_answer_tool = FinalAnswerTool()
         tools = [weather_tool, final_answer_tool]
-        output_parser = ActionParser.from_extra_thoughts([])
+        output_parser = ActionParser.from_extra_thoughts([], [])
         template = ChatPromptTemplate.from_messages(
             messages=[
                 HumanMessagePromptTemplate.from_template("{{input}}", "jinja2"),
