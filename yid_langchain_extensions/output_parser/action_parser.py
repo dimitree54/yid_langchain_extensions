@@ -1,9 +1,15 @@
-from typing import List
+from dataclasses import dataclass
+from typing import List, Dict, Any
 
 from langchain.agents import AgentOutputParser
 from langchain.schema import AgentAction
 
 from yid_langchain_extensions.output_parser.thoughts_json_parser import Thought, ThoughtsJSONParser
+
+
+@dataclass
+class ActionWithThoughts(AgentAction):
+    all_thoughts: Dict[str, Any]
 
 
 class ActionParser(ThoughtsJSONParser, AgentOutputParser):
@@ -15,11 +21,12 @@ class ActionParser(ThoughtsJSONParser, AgentOutputParser):
         ]
 
     @classmethod
-    def from_extra_thoughts(cls, extra_thoughts: List[Thought]):
-        thoughts = extra_thoughts + cls.get_action_thoughts()
+    def from_extra_thoughts(cls, pre_thoughts: List[Thought], after_thoughts: List[Thought]):
+        thoughts = pre_thoughts + cls.get_action_thoughts() + after_thoughts
         return cls(thoughts=thoughts)
 
-    def parse(self, text: str) -> AgentAction:
+    def parse(self, text: str) -> ActionWithThoughts:
         response = super().parse(text)
         fixed_text = self.fix_json_md_snippet(text)
-        return AgentAction(response["action"], response["action_input"], fixed_text)
+        return ActionWithThoughts(
+            tool=response["action"], tool_input=response["action_input"], log=fixed_text, all_thoughts=response)

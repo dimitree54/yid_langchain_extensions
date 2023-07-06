@@ -150,27 +150,37 @@ class TestClassParser(unittest.TestCase):
 
 
 class TestActionParser(unittest.TestCase):
-    def test_class_parser(self):
-        class_parser = ActionParser.from_extra_thoughts(extra_thoughts=[
+    def test_action_parser(self):
+        action_parser = ActionParser.from_extra_thoughts(pre_thoughts=[
             Thought(name="thought1", description="Thought 1")
+        ], after_thoughts=[
+            Thought(name="thought2", description="Thought 2")
         ])
         string_to_parse = """```json
 {
     "thought1": "thought 1",
     "action": "action 1",
-    "action_input": "action input"
+    "action_input": "action input",
+    "thought2": "thought 2"
 """
-        action = class_parser.parse(string_to_parse)
+        action = action_parser.parse(string_to_parse)
         self.assertEqual(action.tool, "action 1")
         self.assertEqual(action.tool_input, "action input")
         self.assertEqual(action.log, string_to_parse + "}\n```")
+        self.assertEqual(action.all_thoughts["thought1"], "thought 1")
+        self.assertEqual(action.all_thoughts["thought2"], "thought 2")
 
     def test_extra_thoughts(self):
-        extra_thoughts = [
+        pre_thoughts = [
             Thought(name="thought1", description="Thought 1"),
             Thought(name="thought2", type="int", description="Thought 2")
         ]
-        class_parser = ActionParser.from_extra_thoughts(extra_thoughts=extra_thoughts)
-        self.assertEqual(class_parser.thoughts[:2], extra_thoughts)
-        self.assertEqual(class_parser.thoughts[2].name, "action")
-        self.assertEqual(class_parser.thoughts[3].name, "action_input")
+        after_thoughts = [
+            Thought(name="thought3", description="Thought 5"),
+            Thought(name="thought4", type="int", description="Thought 6")
+        ]
+        action_parser = ActionParser.from_extra_thoughts(pre_thoughts=pre_thoughts, after_thoughts=after_thoughts)
+        self.assertEqual(action_parser.thoughts[:2], pre_thoughts)
+        self.assertEqual(action_parser.thoughts[2].name, "action")
+        self.assertEqual(action_parser.thoughts[3].name, "action_input")
+        self.assertEqual(action_parser.thoughts[4:], after_thoughts)
