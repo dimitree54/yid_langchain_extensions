@@ -94,6 +94,15 @@ class TestThoughtsJSONParser(unittest.TestCase):
         ).get_format_instructions()
         self.assertTrue('"thought1": string [Thought 1]\n\t"thought2": int [Thought 2]' in format_instructions)
 
+    def test_complex_format_instructions(self):
+        thoughts = [
+            Thought(name="tool", description="One of [{{tools}}]"),
+        ]
+        format_instructions = ThoughtsJSONParser(
+            thoughts=thoughts
+        ).get_format_instructions(tools="tool1, tool2")
+        self.assertTrue(format_instructions, '"tool": string [One of [tool1, tool2]]' in format_instructions)
+
     def test_raise_without_thoughts(self):
         with self.assertRaises(ValidationError):
             ThoughtsJSONParser(thoughts=[])
