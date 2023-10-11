@@ -63,7 +63,10 @@ class ThoughtsJSONParser(BaseOutputParser):
             f'"{thought.name}": {thought.type} [{thought.description}]' for thought in self.thoughts
         ])
 
-    def get_format_instructions(self) -> str:
-        format_instructions = PromptTemplate.from_template(self.format_prompt, template_format="jinja2").format_prompt(
-            thoughts=self.format_thoughts()).to_string()
+    def get_format_instructions(self, **kwargs) -> str:
+        """
+        :param kwargs: If your thoughts or format_prompt have some extra placeholders, you can fill them by kwargs
+        """
+        format_instructions = PromptTemplate.from_template(self.format_prompt, template_format="jinja2").partial(
+            thoughts=self.format_thoughts()).format_prompt(**kwargs).to_string()
         return format_instructions
