@@ -37,7 +37,10 @@ class ThoughtsJSONParser(BaseOutputParser):
 
     @staticmethod
     def fix_json_md_snippet(text: str) -> str:
-        fixed_json = text.strip()
+        fixed_json = text
+        if fixed_json.startswith("'") or fixed_json.startswith('"'):
+            fixed_json = fixed_json[1:]
+        fixed_json = fixed_json.strip()
         fixed_json = escape_new_lines_in_json_values(fixed_json)
         fixed_json = close_all_curly_brackets(fixed_json)
         if "```json" in fixed_json:
