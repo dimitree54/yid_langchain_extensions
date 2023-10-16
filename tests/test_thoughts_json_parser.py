@@ -60,3 +60,12 @@ class TestThoughtsJSONParser(TestCase):
 }"""
         fixed = ThoughtsJSONParser.fix_json_md_snippet(text)
         self.assertEqual(fixed, self.json_md_snippet)
+
+    def test_fix_json_md_snippet_extra_quotes(self):
+        text = """"
+{
+    "thought1": "thought 1",
+    "thought2": 2
+}"""
+        fixed = ThoughtsJSONParser.fix_json_md_snippet(text)
+        self.assertEqual(fixed, self.json_md_snippet)

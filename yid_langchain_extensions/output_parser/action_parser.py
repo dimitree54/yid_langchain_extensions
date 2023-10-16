@@ -7,7 +7,6 @@ from langchain.schema import AgentAction
 from yid_langchain_extensions.output_parser.thoughts_json_parser import Thought, ThoughtsJSONParser
 
 
-@dataclass
 class ActionWithThoughts(AgentAction):
     all_thoughts: Dict[str, Any]
 
