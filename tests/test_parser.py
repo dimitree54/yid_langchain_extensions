@@ -193,3 +193,27 @@ class TestActionParser(unittest.TestCase):
         self.assertEqual(action_parser.thoughts[2].name, "action")
         self.assertEqual(action_parser.thoughts[3].name, "action_input")
         self.assertEqual(action_parser.thoughts[4:], after_thoughts)
+
+    def test_list_action_input(self):
+        action_parser = ActionParser.from_extra_thoughts(pre_thoughts=[], after_thoughts=[])
+        string_to_parse = """```json
+{
+    "action": "action 1",
+    "action_input": ["action input 1", "action input 2"]
+"""
+        action = action_parser.parse(string_to_parse)
+        self.assertEqual(action.tool, "action 1")
+        self.assertEqual(action.tool_input,  ["action input 1", "action input 2"])
+        self.assertEqual(action.log, string_to_parse + "}\n```")
+
+    def test_list_action_dict(self):
+        action_parser = ActionParser.from_extra_thoughts(pre_thoughts=[], after_thoughts=[])
+        string_to_parse = """```json
+{
+    "action": "action 1",
+    "action_input": {"parameter_name": "parameter_value"}
+"""
+        action = action_parser.parse(string_to_parse)
+        self.assertEqual(action.tool, "action 1")
+        self.assertEqual(action.tool_input,  {"parameter_name": "parameter_value"})
+        self.assertEqual(action.log, string_to_parse + "}\n```")
