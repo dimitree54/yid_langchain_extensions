@@ -1,4 +1,4 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union
 
 from langchain.agents import AgentOutputParser
 from langchain.schema import AgentAction
@@ -7,6 +7,7 @@ from yid_langchain_extensions.output_parser.thoughts_json_parser import Thought,
 
 
 class ActionWithThoughts(AgentAction):
+    tool_input: Union[str, dict, list]
     all_thoughts: Dict[str, Any]
 
 
