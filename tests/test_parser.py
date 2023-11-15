@@ -1,6 +1,6 @@
 import unittest
 
-from pydantic import ValidationError
+from pydantic.v1 import ValidationError
 
 from yid_langchain_extensions.output_parser.action_parser import ActionParser
 from yid_langchain_extensions.output_parser.class_parser import Class, get_classes_description, get_classes_summary, \
