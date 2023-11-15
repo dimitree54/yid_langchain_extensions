@@ -3,7 +3,7 @@ from typing import List, Dict, Any
 
 from langchain import PromptTemplate
 from langchain.schema import BaseOutputParser
-from pydantic import BaseModel, validator
+from pydantic.v1 import BaseModel, validator
 
 from yid_langchain_extensions.output_parser.utils import strip_json_from_md_snippet, escape_new_lines_in_json_values, \
     close_all_curly_brackets
