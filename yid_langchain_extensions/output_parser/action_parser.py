@@ -13,15 +13,16 @@ class ActionWithThoughts(AgentAction):
 
 class ActionParser(ThoughtsJSONParser, AgentOutputParser):
     @classmethod
-    def get_action_thoughts(cls) -> List[Thought]:
+    def get_action_thoughts(cls, type_of_action_input: str) -> List[Thought]:
         return [
             Thought(name="action", description="The action to take. Must be one of [{{tool_names}}]"),
-            Thought(name="action_input", description="The input to the action")
+            Thought(name="action_input", description="The input to the action", type=type_of_action_input)
         ]
 
     @classmethod
-    def from_extra_thoughts(cls, pre_thoughts: List[Thought], after_thoughts: List[Thought]):
-        thoughts = pre_thoughts + cls.get_action_thoughts() + after_thoughts
+    def from_extra_thoughts(cls, pre_thoughts: List[Thought], after_thoughts: List[Thought],
+                            type_of_action_input: str = "string"):
+        thoughts = pre_thoughts + cls.get_action_thoughts(type_of_action_input) + after_thoughts
         return cls(thoughts=thoughts)
 
     def parse(self, text: str) -> ActionWithThoughts:
