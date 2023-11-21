@@ -7,7 +7,7 @@ from yid_langchain_extensions.output_parser.thoughts_json_parser import Thought,
 
 
 class ActionWithThoughts(AgentAction):
-    tool_input: Union[str, dict, list]
+    tool_input: Union[str, list, dict]
     all_thoughts: Dict[str, Any]
 
 
