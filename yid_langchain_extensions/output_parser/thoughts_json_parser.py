@@ -19,21 +19,8 @@ You response should be a markdown code snippet formatted in the following schema
 ```"""
 
 
-class Thought(BaseModel):
-    name: str
-    description: str
-    type: str = "string"
-
-
-class ThoughtsJSONParser(BaseOutputParser):
-    thoughts: List[Thought]
+class FixingJSONParser(BaseOutputParser):
     stop_sequences: List[str] = ["}\n```", "}```"]
-    format_prompt: str = FORMAT_PROMPT
-
-    @validator("thoughts")
-    def validate_thoughts(cls, v):
-        assert len(v) > 0, "You must have at least one thought"
-        return v
 
     @staticmethod
     def fix_json_md_snippet(text: str) -> str:
@@ -60,6 +47,22 @@ class ThoughtsJSONParser(BaseOutputParser):
     def parse(self, text: str) -> Dict[str, Any]:
         fixed_json_md_snippet = self.fix_json_md_snippet(text)
         return self.parse_json_md_snippet(fixed_json_md_snippet)
+
+
+class Thought(BaseModel):
+    name: str
+    description: str
+    type: str = "string"
+
+
+class ThoughtsJSONParser(FixingJSONParser):
+    thoughts: List[Thought]
+    format_prompt: str = FORMAT_PROMPT
+
+    @validator("thoughts")
+    def validate_thoughts(cls, v):  # noqa
+        assert len(v) > 0, "You must have at least one thought"
+        return v
 
     def format_thoughts(self) -> str:
         return "\n\t".join([
