@@ -20,10 +20,8 @@ class TestPydanticV1Port(TestCase):
         self.llm = FakeListLLM(responses=[])
 
     def test_v1_port(self):
-        llm = FakeListLLM(responses=[])
         Pydantic2ClassWithPort(llm=self.llm)
 
     def test_port_required(self):
-        llm = FakeListLLM(responses=[])
         with self.assertRaises(TypeError):
             Pydantic2ClassWithoutPort(llm=self.llm)
