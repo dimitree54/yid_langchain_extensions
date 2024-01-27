@@ -5,7 +5,7 @@ from langchain_core.output_parsers import BaseOutputParser
 
 
 class StopSeqOutputParser(BaseOutputParser, ABC):
-    @abstractmethod
     @property
+    @abstractmethod
     def stop_sequences(self) -> List[str]:
         pass
