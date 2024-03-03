@@ -1,3 +1,4 @@
+from typing import List
 from unittest import TestCase
 
 from langchain_community.llms.fake import FakeListLLM
@@ -15,6 +16,10 @@ class Pydantic2ClassWithPort(BaseModel):
     llm: pydantic_v1_port(LLM)
 
 
+class Pydantic2ClassWithPortNested(BaseModel):
+    llm_list: pydantic_v1_port(List[LLM])
+
+
 class TestPydanticV1Port(TestCase):
     def setUp(self):
         self.llm = FakeListLLM(responses=[])
@@ -25,3 +30,6 @@ class TestPydanticV1Port(TestCase):
     def test_port_required(self):
         with self.assertRaises(TypeError):
             Pydantic2ClassWithoutPort(llm=self.llm)
+
+    def test_v1_port_nested(self):
+        Pydantic2ClassWithPortNested(llm_list=[self.llm])
