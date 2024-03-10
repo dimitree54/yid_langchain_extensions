@@ -1,12 +1,12 @@
-from typing import Sequence, Union, Dict, Any, Type, Callable
+from typing import Union, Dict, Any, Type, Callable, List, Optional
 
-from langchain.agents.output_parsers.openai_tools import OpenAIToolsAgentOutputParser
-from langchain_core.runnables import Runnable
+from langchain.agents.output_parsers.openai_tools import OpenAIToolAgentAction
+from langchain_core.agents import AgentFinish
+from langchain_core.runnables import Runnable, RunnableConfig
 from langchain_core.tools import BaseTool
 from langchain_core.utils.function_calling import convert_to_openai_tool, _rm_titles, \
     convert_to_openai_function
 from langchain_core.utils.json_schema import dereference_refs
-from langchain_openai import ChatOpenAI
 from pydantic import BaseModel as BaseModelV2
 from pydantic.v1 import BaseModel as BaseModelV1
 
@@ -45,14 +45,19 @@ def convert_to_openai_tool_v2(
         return convert_to_openai_tool(tool)
 
 
-def create_fn_calling_llm(
-        llm: ChatOpenAI,
-        tools: Sequence[Union[Dict[str, Any], Type[BaseModelV1], Type[BaseModelV2], Callable, BaseTool]]
-) -> Runnable:
-    llm_with_tools = llm.bind(tools=[convert_to_openai_tool_v2(tool) for tool in tools])
+class ToolCallToPydanticConverter(
+    BaseModelV2, Runnable[
+        Union[List[OpenAIToolAgentAction], AgentFinish],
+        List[Union[Type[BaseModelV1], Type[BaseModelV2]]]
+    ]
+):
+    pydantic_class: Union[Type[BaseModelV1], Type[BaseModelV2]]
 
-    agent = (
-            llm_with_tools
-            | OpenAIToolsAgentOutputParser()
-    )
-    return agent
+    def invoke(
+            self, input: Union[List[OpenAIToolAgentAction], AgentFinish], config: Optional[RunnableConfig] = None
+    ) -> List[Union[BaseModelV1, BaseModelV2]]:
+        if isinstance(input, AgentFinish):
+            raise ValueError("Only AgentAction may be parsed to pydantic, but AgentFinish provided.")
+        return [
+            self.pydantic_class(**input_instance.tool_input) for input_instance in input
+        ]
