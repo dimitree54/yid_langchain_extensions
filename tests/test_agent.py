@@ -1,10 +1,9 @@
 import unittest
 
-from langchain import PromptTemplate
-from langchain.llms import FakeListLLM
-from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate, MessagesPlaceholder
+from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate, MessagesPlaceholder, PromptTemplate
 from langchain.schema import SystemMessage
 from langchain.tools import Tool
+from langchain_community.llms.fake import FakeListLLM
 
 from yid_langchain_extensions.agent.simple_agent import SimpleAgent
 from yid_langchain_extensions.output_parser.action_parser import ActionParser
@@ -39,5 +38,5 @@ class TestSimpleAgent(unittest.TestCase):
         agent_executor = SimpleAgent.from_llm_and_prompt(
             llm=llm, prompt=template, output_parser=output_parser, stop_sequences=output_parser.stop_sequences
         ).get_executor(tools=tools)
-        answer = agent_executor.run(input="What is the weather in Moscow?")
+        answer = agent_executor.invoke({"input": "What is the weather in Moscow?"})["output"]
         self.assertEqual(answer, "In Moscow rainy with a temperature of 10°C.")

@@ -1,8 +1,8 @@
-from copy import deepcopy
-from typing import Annotated, Type, Any, Dict, Union, Callable, Optional
+from typing import Annotated, Type, Any, Dict, Union, Callable, Optional, Sequence
 
-from langchain_core.runnables import RunnableBinding, RunnableConfig
-from langchain_core.runnables.utils import Input, Output
+from langchain_core.messages import BaseMessage
+from langchain_core.prompt_values import ChatPromptValue
+from langchain_core.runnables import RunnableConfig, Runnable
 from langchain_core.tools import BaseTool
 from langchain_core.utils.function_calling import _rm_titles, convert_to_openai_function, convert_to_openai_tool  # noqa
 from langchain_core.utils.json_schema import dereference_refs
@@ -55,25 +55,12 @@ def convert_to_openai_tool_v2(
         return convert_to_openai_tool(tool)
 
 
-class ListExtendingRunnableBinding(RunnableBinding):
-    @staticmethod
-    def merge_dicts_with_list_extension(base: dict, update: dict) -> dict:
-        result = deepcopy(base)
-        for key, value in update.items():
-            if key in result and isinstance(result[key], list) and isinstance(value, list):
-                result[key].extend(value)
-            else:
-                result[key] = value
-        return result
-
+class ChatPromptValue2DictAdapter(Runnable[Union[ChatPromptValue, Dict], Dict[str, Sequence[BaseMessage]]]):
     def invoke(
-            self,
-            input: Input,  # noqa
-            config: Optional[RunnableConfig] = None,
-            **kwargs: Optional[Any],
-    ) -> Output:
-        return self.bound.invoke(
-            input,
-            self._merge_configs(config),
-            **self.merge_dicts_with_list_extension(self.kwargs, kwargs),  # noqa
-        )
+            self, input: Union[ChatPromptValue, Dict], config: Optional[RunnableConfig] = None  # noqa
+    ) -> Dict[str, Sequence[BaseMessage]]:
+        if isinstance(input, Dict):
+            return input
+        return {
+            "messages": input.messages
+        }

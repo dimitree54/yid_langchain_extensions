@@ -1,10 +1,11 @@
 from typing import Any, Sequence, List, Tuple
 
-from langchain import BasePromptTemplate, LLMChain
 from langchain.agents import Agent, AgentOutputParser
 from langchain.base_language import BaseLanguageModel
+from langchain.chains import LLMChain
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema import AgentAction, BaseMessage, AIMessage, FunctionMessage
+from langchain.schema.prompt_template import BasePromptTemplate
 from langchain.tools import BaseTool
 
 from yid_langchain_extensions.agent.raw_output_agent_executor import AgentWithThoughtsExecutor
