@@ -10,6 +10,7 @@ from langchain_core.utils.function_calling import convert_to_openai_tool, _rm_ti
 from langchain_core.utils.json_schema import dereference_refs
 from pydantic import BaseModel as BaseModelV2
 from pydantic.v1 import BaseModel as BaseModelV1
+from pydantic_core import ValidationError
 
 
 def convert_pydantic_to_openai_function_v2(
@@ -61,12 +62,16 @@ class PydanticOutputParser(MultiActionAgentOutputParser):
         tool_call_actions = self.base_parser.parse_result(result, partial=partial)
         if isinstance(tool_call_actions, AgentFinish):
             return tool_call_actions
-        return AgentFinish(
-            return_values={
-                self.return_key: [self.pydantic_class(**agent_action.tool_input) for agent_action in tool_call_actions]
-            },
-            log="\n".join([agent_action.log for agent_action in tool_call_actions])
-        )
+        try:
+            return AgentFinish(
+                return_values={
+                    self.return_key: [self.pydantic_class(**agent_action.tool_input) for agent_action in
+                                      tool_call_actions]
+                },
+                log="\n".join([agent_action.log for agent_action in tool_call_actions])
+            )
+        except ValidationError as e:
+            raise ValueError(f"LLM failed to predict proper structure for pydantic class:\n{str(e)}")
 
     def parse(self, text: str) -> AgentFinish:
         raise ValueError("Can only parse messages")
