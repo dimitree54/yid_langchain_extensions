@@ -10,11 +10,7 @@ from pydantic.v1 import BaseModel as BaseModelV1
 
 class PydanticOutputParser(MultiActionAgentOutputParser):
     pydantic_class: Union[Type[BaseModelV1], Type[BaseModelV2]]
-    base_parser: MultiActionAgentOutputParser = OpenAIToolsAgentOutputParser()
-
-    @property
-    def _type(self) -> str:
-        return f"pydantic-{self.base_parser._type}"
+    base_parser: OpenAIToolsAgentOutputParser
 
     def parse_result(
             self, result: AIMessage, *, partial: bool = False
