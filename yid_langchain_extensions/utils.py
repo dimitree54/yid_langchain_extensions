@@ -4,7 +4,7 @@ from typing import Annotated, Type, Any, Dict, Union, Callable, Optional
 from langchain_core.runnables import RunnableBinding, RunnableConfig
 from langchain_core.runnables.utils import Input, Output
 from langchain_core.tools import BaseTool
-from langchain_core.utils.function_calling import _rm_titles, convert_to_openai_function, convert_to_openai_tool
+from langchain_core.utils.function_calling import _rm_titles, convert_to_openai_function, convert_to_openai_tool  # noqa
 from langchain_core.utils.json_schema import dereference_refs
 from pydantic import ValidationError, PlainValidator, BaseModel as BaseModelV2
 from pydantic.v1 import BaseModel as BaseModelV1, parse_obj_as
@@ -68,12 +68,12 @@ class ListExtendingRunnableBinding(RunnableBinding):
 
     def invoke(
             self,
-            input: Input,
+            input: Input,  # noqa
             config: Optional[RunnableConfig] = None,
             **kwargs: Optional[Any],
     ) -> Output:
         return self.bound.invoke(
             input,
             self._merge_configs(config),
-            **self.merge_dicts_with_list_extension(self.kwargs, kwargs),
+            **self.merge_dicts_with_list_extension(self.kwargs, kwargs),  # noqa
         )

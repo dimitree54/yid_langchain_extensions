@@ -15,7 +15,7 @@ class PydanticOutputParser(MultiActionAgentOutputParser):
     def parse_result(
             self, result: AIMessage, *, partial: bool = False
     ) -> Union[BaseModelV1, BaseModelV2]:
-        tool_call_actions = self.base_parser.parse_result(result, partial=partial)
+        tool_call_actions = self.base_parser.parse_result(result, partial=partial)  # noqa
         if isinstance(tool_call_actions, AgentFinish):
             raise ValueError("Only AgentAction with tool call may be converted to pydantic object")
         return self.pydantic_class(**tool_call_actions[0].tool_input)
