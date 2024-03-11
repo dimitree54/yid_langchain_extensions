@@ -1,14 +1,14 @@
 from typing import Union, Type
 
-from langchain.agents.agent import MultiActionAgentOutputParser
 from langchain.agents.output_parsers.openai_tools import OpenAIToolsAgentOutputParser
 from langchain_core.agents import AgentFinish
 from langchain_core.messages import AIMessage
+from langchain_core.output_parsers import BaseOutputParser
 from pydantic import BaseModel as BaseModelV2
 from pydantic.v1 import BaseModel as BaseModelV1
 
 
-class PydanticOutputParser(MultiActionAgentOutputParser):
+class PydanticOutputParser(BaseOutputParser[Union[BaseModelV1, BaseModelV2]]):
     pydantic_class: Union[Type[BaseModelV1], Type[BaseModelV2]]
     base_parser: OpenAIToolsAgentOutputParser
 
