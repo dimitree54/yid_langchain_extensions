@@ -3,7 +3,6 @@ from typing import Union, Dict, Type, Optional
 from langchain_core.messages import AIMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable, RunnableConfig, RunnablePassthrough
-from langchain_openai import ChatOpenAI
 from pydantic import BaseModel as BaseModelV2
 from pydantic.v1 import BaseModel as BaseModelV1
 
@@ -23,7 +22,7 @@ class ThoughtStripper(BaseModelV2, Runnable[AIMessage, AIMessage]):
 
 
 def build_tools_llm_with_thought(
-        tools_llm: ChatOpenAI,
+        tools_llm: Runnable[Dict, AIMessage],
         thought_introducing_prompt: ChatPromptTemplate,
         thought_class: Union[Type[BaseModelV1], Type[BaseModelV2]]
 ) -> Runnable[Dict, AIMessage]:
