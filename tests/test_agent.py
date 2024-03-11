@@ -1,10 +1,9 @@
 import unittest
 
-from langchain import PromptTemplate
-from langchain.llms import FakeListLLM
-from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate, MessagesPlaceholder
+from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate, MessagesPlaceholder, PromptTemplate
 from langchain.schema import SystemMessage
 from langchain.tools import Tool
+from langchain_community.llms.fake import FakeListLLM
 
 from yid_langchain_extensions.agent.simple_agent import SimpleAgent
 from yid_langchain_extensions.output_parser.action_parser import ActionParser
