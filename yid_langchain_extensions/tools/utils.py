@@ -1,7 +1,7 @@
 from typing import List
 
-from langchain import PromptTemplate
 from langchain.tools import BaseTool
+from langchain_core.prompts import PromptTemplate
 
 TOOLS_PROMPT = """AVAILABLE ACTIONS:
 ------

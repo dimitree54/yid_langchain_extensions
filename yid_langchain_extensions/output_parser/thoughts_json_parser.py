@@ -1,6 +1,6 @@
 from typing import List
 
-from langchain import PromptTemplate
+from langchain_core.prompts import PromptTemplate
 from pydantic.v1 import BaseModel, validator
 
 from yid_langchain_extensions.output_parser.fising_json_parser import FixingJSONParser
