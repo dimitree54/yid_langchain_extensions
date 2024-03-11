@@ -38,5 +38,5 @@ class TestSimpleAgent(unittest.TestCase):
         agent_executor = SimpleAgent.from_llm_and_prompt(
             llm=llm, prompt=template, output_parser=output_parser, stop_sequences=output_parser.stop_sequences
         ).get_executor(tools=tools)
-        answer = agent_executor.run(input="What is the weather in Moscow?")
+        answer = agent_executor.invoke({"input": "What is the weather in Moscow?"})["output"]
         self.assertEqual(answer, "In Moscow rainy with a temperature of 10°C.")
