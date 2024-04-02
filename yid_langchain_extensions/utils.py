@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from copy import deepcopy
 from typing import Annotated, Type, Any, Dict, Union, Callable, Optional, Sequence, List
 
 from langchain_core.language_models import BaseChatModel
@@ -80,11 +79,12 @@ class ContextSizeLimiter(BaseModel, ABC):
 
 class NaiveContextSizeLimiter(ContextSizeLimiter):
     def limit_messages(self, messages: List[BaseMessage]) -> List[BaseMessage]:
-        cut_messages = []
-        for message in reversed(messages):
-            new_cut_messages = deepcopy(cut_messages)
-            new_cut_messages.insert(0, message)
-            if self.llm.get_num_tokens_from_messages(new_cut_messages) > self.max_context_size:
-                return cut_messages
-            cut_messages = new_cut_messages
-        return cut_messages
+        num_messages_to_keep = 1
+        while num_messages_to_keep <= len(messages):
+            extended_num_messages_to_keep = num_messages_to_keep + 1
+            last_messages = messages[-extended_num_messages_to_keep:]
+            tokens_in_extended_messages = self.llm.get_num_tokens_from_messages(last_messages)
+            if tokens_in_extended_messages > self.max_context_size:
+                break
+            num_messages_to_keep = extended_num_messages_to_keep
+        return messages[-num_messages_to_keep:]
