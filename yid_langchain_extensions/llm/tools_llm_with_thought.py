@@ -1,6 +1,6 @@
-from typing import Union, Dict, Type, Optional, Any, List
+from typing import Union, Dict, Type, Optional, Any, List, AsyncIterator
 
-from langchain_core.messages import AIMessage
+from langchain_core.messages import AIMessage, AIMessageChunk
 from langchain_core.prompt_values import ChatPromptValue
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable, RunnableConfig, RunnablePassthrough
@@ -11,16 +11,49 @@ from pydantic.v1 import BaseModel as BaseModelV1
 from yid_langchain_extensions.utils import convert_to_openai_tool_v2, ChatPromptValue2DictAdapter
 
 
-class ThoughtStripper(BaseModelV2, Runnable[AIMessage, AIMessage]):
-    thought_name: str
+class ThoughtStripper(Runnable[AIMessageChunk, AIMessageChunk]):
+    def __init__(self, thought_name: str):
+        self.thought_name = thought_name
+        self.silenced = False
 
-    def invoke(self, input: AIMessage, config: Optional[RunnableConfig] = None) -> AIMessage:
-        if "tool_calls" in input.additional_kwargs:
-            input.additional_kwargs["tool_calls"] = [
-                tool_call for tool_call in input.additional_kwargs["tool_calls"]
-                if tool_call["function"]["name"] != self.thought_name
-            ]
-        return input
+    def invoke(
+            self,
+            input: AIMessage,  # noqa
+            config: Optional[RunnableConfig] = None
+    ) -> AIMessage:
+        return self._strip(input)
+
+    async def atransform(
+        self,
+        input: AsyncIterator[AIMessageChunk],  # noqa
+        config: Optional[RunnableConfig] = None,
+        **kwargs: Optional[Any],
+    ) -> AsyncIterator[AIMessageChunk]:
+        async for chunk in input:
+            yield self._strip_from_chunk(chunk)
+
+    def _strip(self, message: AIMessage) -> AIMessage:
+        message.additional_kwargs["tool_calls"] = [tool_call for tool_call in message.additional_kwargs["tool_calls"]
+                                                   if tool_call["function"]["name"] != self.thought_name]
+        message.tool_calls = [tool_call for tool_call in message.tool_calls
+                              if tool_call["name"] != self.thought_name]
+        if isinstance(message, AIMessageChunk):
+            message.tool_call_chunks = [tool_call for tool_call in message.tool_call_chunks
+                                        if tool_call["name"] != self.thought_name]
+        return message
+
+    def _strip_from_chunk(self, message: AIMessageChunk) -> AIMessageChunk:
+        for tool_call_chunk in message.tool_call_chunks:
+            tool_name = tool_call_chunk["name"]
+            if tool_name == self.thought_name:
+                self.silenced = True
+            elif tool_name is not None:
+                self.silenced = False
+        if self.silenced:
+            message.additional_kwargs["tool_calls"] = []
+            message.tool_calls = []
+            message.tool_call_chunks = []
+        return message
 
 
 def build_tools_llm_with_thought(
