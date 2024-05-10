@@ -32,6 +32,7 @@ class ThoughtStripper(Runnable[AIMessageChunk, AIMessageChunk]):
     ) -> AsyncIterator[AIMessageChunk]:
         async for chunk in input:
             yield self._strip_from_chunk(chunk)
+        self.silenced = False
 
     def _strip(self, message: AIMessage) -> AIMessage:
         message = copy.deepcopy(message)
