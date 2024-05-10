@@ -1,3 +1,4 @@
+import copy
 from typing import Union, Dict, Type, Optional, Any, List, AsyncIterator
 
 from langchain_core.messages import AIMessage, AIMessageChunk
@@ -31,8 +32,10 @@ class ThoughtStripper(Runnable[AIMessageChunk, AIMessageChunk]):
     ) -> AsyncIterator[AIMessageChunk]:
         async for chunk in input:
             yield self._strip_from_chunk(chunk)
+        self.silenced = False
 
     def _strip(self, message: AIMessage) -> AIMessage:
+        message = copy.deepcopy(message)
         message.additional_kwargs["tool_calls"] = [tool_call for tool_call in message.additional_kwargs["tool_calls"]
                                                    if tool_call["function"]["name"] != self.thought_name]
         message.tool_calls = [tool_call for tool_call in message.tool_calls
@@ -43,6 +46,7 @@ class ThoughtStripper(Runnable[AIMessageChunk, AIMessageChunk]):
         return message
 
     def _strip_from_chunk(self, message: AIMessageChunk) -> AIMessageChunk:
+        message = copy.deepcopy(message)
         for tool_call_chunk in message.tool_call_chunks:
             tool_name = tool_call_chunk["name"]
             if tool_name == self.thought_name:
