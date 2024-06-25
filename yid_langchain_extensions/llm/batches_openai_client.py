@@ -136,4 +136,4 @@ class BatchesOpenAICompletions(AsyncCompletions):
                     await self._client.files.delete(batch_updated_info.error_file_id)
                     raise Exception(data_dict["response"]["body"])
                 else:
-                    raise Exception(f"LLM failed with unknown reason")
+                    raise Exception("LLM failed with unknown reason")
