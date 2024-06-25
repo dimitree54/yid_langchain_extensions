@@ -94,39 +94,46 @@ class BatchesOpenAICompletions(AsyncCompletions):
             input_file.flush()
 
             # uploading input file
-            batch_input_file = await self._client.files.create(
-                file=open(input_file.name, "rb"),
-                purpose="batch"
-            )
+            with open(input_file.name, "rb") as f:
+                batch_input_file = await self._client.files.create(
+                    file=f,
+                    purpose="batch"
+                )
 
-            # launching
-            batch_launch_info = await self._client.batches.create(
-                input_file_id=batch_input_file.id,
-                endpoint="/v1/chat/completions",
-                completion_window="24h",
-                metadata={"description": job_id}
-            )
+        # launching
+        batch_launch_info = await self._client.batches.create(
+            input_file_id=batch_input_file.id,
+            endpoint="/v1/chat/completions",
+            completion_window="24h",
+            metadata={"description": job_id}
+        )
 
-            # waiting to finish
-            while True:
-                await asyncio.sleep(5)
-                batch_updated_info = await self._client.batches.retrieve(batch_launch_info.id)
-                if batch_updated_info.status in ["validating", "in_progress", "finalizing", "cancelling"]:
-                    continue  # still busy
-                elif batch_updated_info.status == "completed":  # done
-                    # getting result
-                    result_content = await self._client.files.content(batch_updated_info.output_file_id)
-                    # parsing result
+        # waiting to finish
+        while True:
+            await asyncio.sleep(5)
+            batch_updated_info = await self._client.batches.retrieve(batch_launch_info.id)
+            if batch_updated_info.status in ["validating", "in_progress", "finalizing", "cancelling"]:
+                continue  # still busy
+            elif batch_updated_info.status == "completed" and batch_updated_info.output_file_id:  # done
+                # getting result
+                result_content = await self._client.files.content(batch_updated_info.output_file_id)
+                # parsing result
+                json_string = result_content.content.decode(result_content.encoding)
+                data_dict = json.loads(json_string)
+                completion = ChatCompletion(**data_dict["response"]["body"])
+
+                # cleanup files
+                await self._client.files.delete(batch_input_file.id)
+                await self._client.files.delete(batch_updated_info.output_file_id)
+
+                return completion
+            else:  # batch failed
+                await self._client.files.delete(batch_input_file.id)
+                if batch_updated_info.error_file_id:
+                    result_content = await self._client.files.content(batch_updated_info.error_file_id)
                     json_string = result_content.content.decode(result_content.encoding)
                     data_dict = json.loads(json_string)
-                    completion = ChatCompletion(
-                        **data_dict["response"]["body"]
-                    )
-
-                    # cleanup files
-                    await self._client.files.delete(batch_input_file.id)
-                    await self._client.files.delete(batch_updated_info.output_file_id)
-
-                    return completion
-                else:  # batch failed
-                    raise Exception(f"Batch failed with status: {batch_updated_info.status}")
+                    await self._client.files.delete(batch_updated_info.error_file_id)
+                    raise Exception(data_dict["response"]["body"])
+                else:
+                    raise Exception("LLM failed with unknown reason")

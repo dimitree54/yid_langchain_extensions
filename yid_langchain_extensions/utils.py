@@ -1,6 +1,9 @@
+import base64
 from abc import ABC, abstractmethod
 from typing import Annotated, Type, Any, Dict, Union, Callable, Optional, Sequence, List
 
+import cv2
+import numpy as np
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import BaseMessage
 from langchain_core.prompt_values import ChatPromptValue
@@ -88,3 +91,20 @@ class NaiveContextSizeLimiter(ContextSizeLimiter):
                 break
             num_messages_to_keep = extended_num_messages_to_keep
         return messages[-num_messages_to_keep:]
+
+
+def encode_image_to_url(image: np.ndarray) -> str:
+    # Ensure the image is in 3-channel format
+    if len(image.shape) != 3 or image.shape[2] != 3:
+        raise ValueError("Input image must be a 3-channel image")
+
+    # Encode the image to PNG format
+    _, buffer = cv2.imencode('.png', image)
+
+    # Convert the buffer to base64
+    base64_image = base64.b64encode(buffer).decode('utf-8')
+
+    # Create the data URL
+    base64_url = f"data:image/png;base64,{base64_image}"
+
+    return base64_url
