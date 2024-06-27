@@ -72,15 +72,15 @@ class ChatPromptValue2DictAdapter(Runnable[Union[ChatPromptValue, Dict], Dict[st
 
 
 class ContextSizeLimiter(BaseModel, ABC):
-    max_context_size: int
-    llm: pydantic_v1_port(BaseChatModel)
-
     @abstractmethod
     def limit_messages(self, messages: List[BaseMessage]) -> List[BaseMessage]:
         pass
 
 
 class NaiveContextSizeLimiter(ContextSizeLimiter):
+    max_context_size: int
+    llm: pydantic_v1_port(BaseChatModel)
+
     def limit_messages(self, messages: List[BaseMessage]) -> List[BaseMessage]:
         num_messages_to_keep = 1
         while num_messages_to_keep <= len(messages):
@@ -91,6 +91,21 @@ class NaiveContextSizeLimiter(ContextSizeLimiter):
                 break
             num_messages_to_keep = extended_num_messages_to_keep
         return messages[-num_messages_to_keep:]
+
+
+class FirstMessageAuthorContextSizeLimiter(ContextSizeLimiter):
+    first_message_author: str
+    base_limiter: ContextSizeLimiter
+
+    def _remove_head_until_author(self, messages: List[BaseMessage]) -> List[BaseMessage]:
+        for i in range(len(messages)):
+            if messages[i].type == self.first_message_author:
+                return messages[i:]
+        return []
+
+    def limit_messages(self, messages: List[BaseMessage]) -> List[BaseMessage]:
+        messages = self.base_limiter.limit_messages(messages)
+        return self._remove_head_until_author(messages)
 
 
 def encode_image_to_url(image: np.ndarray) -> str:
