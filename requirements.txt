@@ -1,4 +1,4 @@
-langchain>=0.1.14,<0.3
+langchain>=0.1.14,<0.4
 setuptools>=67.8.0
 pydantic>=2
 bump2version>=1.0.1
