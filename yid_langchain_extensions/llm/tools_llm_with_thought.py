@@ -1,5 +1,5 @@
 import copy
-from typing import Union, Dict, Type, Optional, Any, List, AsyncIterator
+from typing import Dict, Type, Optional, Any, List, AsyncIterator
 
 from langchain_core.messages import AIMessage, AIMessageChunk
 from langchain_core.prompt_values import ChatPromptValue
