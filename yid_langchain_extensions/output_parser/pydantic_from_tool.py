@@ -4,17 +4,16 @@ from langchain.agents.output_parsers.openai_tools import OpenAIToolsAgentOutputP
 from langchain_core.agents import AgentFinish
 from langchain_core.messages import AIMessage
 from langchain_core.output_parsers import BaseOutputParser
-from pydantic import BaseModel as BaseModelV2
-from pydantic.v1 import BaseModel as BaseModelV1
+from pydantic import BaseModel
 
 
-class PydanticOutputParser(BaseOutputParser[Union[BaseModelV1, BaseModelV2]]):
-    pydantic_class: Union[Type[BaseModelV1], Type[BaseModelV2]]
+class PydanticOutputParser(BaseOutputParser[BaseModel]):
+    pydantic_class: Type[BaseModel]
     base_parser: OpenAIToolsAgentOutputParser
 
     def parse_result(
             self, result: AIMessage, *, partial: bool = False
-    ) -> Union[BaseModelV1, BaseModelV2]:
+    ) -> BaseModel:
         tool_call_actions = self.base_parser.parse_result(result, partial=partial)  # noqa
         if isinstance(tool_call_actions, AgentFinish):
             raise ValueError("Only AgentAction with tool call may be converted to pydantic object")

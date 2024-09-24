@@ -1,6 +1,6 @@
 import base64
 from abc import ABC, abstractmethod
-from typing import Annotated, Type, Any, Dict, Union, Callable, Optional, Sequence, List
+from typing import Type, Any, Dict, Union, Callable, Optional, Sequence, List
 
 import cv2
 import numpy as np
@@ -11,23 +11,11 @@ from langchain_core.runnables import RunnableConfig, Runnable
 from langchain_core.tools import BaseTool
 from langchain_core.utils.function_calling import _rm_titles, convert_to_openai_function, convert_to_openai_tool  # noqa
 from langchain_core.utils.json_schema import dereference_refs
-from pydantic import ValidationError, PlainValidator, BaseModel as BaseModelV2, BaseModel
-from pydantic.v1 import BaseModel as BaseModelV1, parse_obj_as
-
-
-def validated(value: BaseModelV1, target_class: Type[Any]) -> BaseModelV1:
-    try:
-        return parse_obj_as(target_class, value)  # noqa
-    except ValidationError as e:
-        raise ValidationError(f"Input of invalid type: {e}")
-
-
-def pydantic_v1_port(cls):
-    return Annotated[cls, PlainValidator(lambda val: validated(val, cls))]
+from pydantic import BaseModel
 
 
 def convert_pydantic_to_openai_function_v2(
-        model: Type[BaseModelV2],
+        model: Type[BaseModel],
 ) -> Dict[str, Any]:
     schema = dereference_refs(model.model_json_schema())
     schema.pop("definitions", None)
@@ -41,18 +29,18 @@ def convert_pydantic_to_openai_function_v2(
 
 
 def convert_to_openai_function_v2(
-        function: Union[Dict[str, Any], Type[BaseModelV1], Callable, BaseTool, Type[BaseModelV2]],
+    function: Union[Dict[str, Any], Type[BaseModel], Callable, BaseTool],
 ) -> Dict[str, Any]:
-    if isinstance(function, type) and issubclass(function, BaseModelV2):
+    if isinstance(function, type) and issubclass(function, BaseModel):
         return convert_pydantic_to_openai_function_v2(function)
     else:
         return convert_to_openai_function(function)
 
 
 def convert_to_openai_tool_v2(
-        tool: Union[Dict[str, Any], Type[BaseModelV1], Callable, BaseTool, Type[BaseModelV2]],
+        tool: Union[Dict[str, Any], Type[BaseModel], Callable, BaseTool],
 ) -> Dict[str, Any]:
-    if isinstance(tool, type) and issubclass(tool, BaseModelV2):
+    if isinstance(tool, type) and issubclass(tool, BaseModel):
         return convert_to_openai_tool(
             convert_to_openai_function_v2(tool)
         )
@@ -79,7 +67,7 @@ class ContextSizeLimiter(BaseModel, ABC):
 
 class NaiveContextSizeLimiter(ContextSizeLimiter):
     max_context_size: int
-    llm: pydantic_v1_port(BaseChatModel)
+    llm: BaseChatModel
 
     def limit_messages(self, messages: List[BaseMessage]) -> List[BaseMessage]:
         num_messages_to_keep = 1

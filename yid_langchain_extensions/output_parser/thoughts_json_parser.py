@@ -1,7 +1,5 @@
-from typing import List
-
 from langchain_core.prompts import PromptTemplate
-from pydantic.v1 import BaseModel, validator
+from pydantic import BaseModel, conlist
 
 from yid_langchain_extensions.output_parser.fixing_json_parser import FixingJSONParser
 
@@ -23,13 +21,8 @@ class Thought(BaseModel):
 
 
 class ThoughtsJSONParser(FixingJSONParser):
-    thoughts: List[Thought]
+    thoughts: conlist(Thought, min_length=1)
     format_prompt: str = FORMAT_PROMPT
-
-    @validator("thoughts")
-    def validate_thoughts(cls, v):  # noqa
-        assert len(v) > 0, "You must have at least one thought"
-        return v
 
     def format_thoughts(self) -> str:
         return "\n\t".join([

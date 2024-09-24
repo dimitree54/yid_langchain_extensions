@@ -6,8 +6,7 @@ from langchain_core.prompt_values import ChatPromptValue
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable, RunnableConfig, RunnablePassthrough
 from langchain_openai import ChatOpenAI
-from pydantic import BaseModel as BaseModelV2
-from pydantic.v1 import BaseModel as BaseModelV1
+from pydantic import BaseModel
 
 from yid_langchain_extensions.utils import convert_to_openai_tool_v2, ChatPromptValue2DictAdapter
 
@@ -64,7 +63,7 @@ def build_tools_llm_with_thought(
         tools_llm: ChatOpenAI,
         openai_tools: List[Dict[str, Any]],
         thought_introducing_prompt: ChatPromptTemplate,
-        thought_class: Union[Type[BaseModelV1], Type[BaseModelV2]]
+        thought_class: Type[BaseModel]
 ) -> Runnable[ChatPromptValue, AIMessage]:
     thought_tool = convert_to_openai_tool_v2(thought_class)
     all_tools = [thought_tool] + openai_tools
