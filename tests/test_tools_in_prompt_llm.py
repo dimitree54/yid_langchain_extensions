@@ -23,8 +23,8 @@ class Dot(BaseModel):
 
 class TestModelWithTools(unittest.TestCase):
     def setUp(self):
-        # actually gpt-4.1-nano supports tools out of the box, but it is easiest to set up as example
-        test_llm = ChatOpenAI(model_name="gpt-4.1-nano-2025-04-14", temperature=0)
+        # actually o4-mini supports tools out of the box, but it is easiest to set up as example
+        test_llm = ChatOpenAI(model_name="o4-mini-2025-04-16")
         self.llm = ModelWithPromptIntroducedTools.wrap_model(base_model=test_llm)
 
     def test_auto_sequential_tool_choice(self):
@@ -41,18 +41,14 @@ class TestModelWithTools(unittest.TestCase):
         self.assertEquals(answer.tool_calls[0]["args"].get("b"), 5)
         self.assertIsNotNone(answer.tool_calls[0]["id"])
 
-    @unittest.expectedFailure
     def test_auto_sequential_tool_choice_tricky(self):
-        """gpt-4.1-nano-2025-04-14 can not pass it. It answers directly, instead of calling one of tools as requested"""
         chain_sequential = self.llm.bind_tools(
             tools=[add, Dot], tool_choice="auto") | DeepseekR1JsonToolCallsParser()
 
         answer: AIMessage = chain_sequential.invoke("call tool add(3,5) and Dot(2,7)")
         self.assertEquals(len(answer.tool_calls), 1)
 
-    @unittest.expectedFailure
     def test_auto_parallel_tool_choice(self):
-        """gpt-4.1-nano-2025-04-14 can not pass it. It answers directly, instead of calling one of tools as requested"""
         chain_parallel = self.llm.bind_tools(
             tools=[add, Dot], tool_choice="auto", parallel_tool_calls=True) | DeepseekR1JsonToolCallsParser()
 
@@ -118,9 +114,7 @@ class TestModelWithTools(unittest.TestCase):
         self.assertEquals(answer.tool_calls[1]["args"].get("b"), 7)
         self.assertIsNotNone(answer.tool_calls[1]["id"])
 
-    @unittest.expectedFailure
     def test_any_parallel_tricky(self):
-        """gpt-4.1-nano-2025-04-14 can not pass it. It answers directly, ignoring that tool call requested."""
         chain_parallel = self.llm.bind_tools(
             tools=[add, Dot], tool_choice="any", parallel_tool_calls=True) | DeepseekR1JsonToolCallsParser()
 
@@ -146,9 +140,7 @@ class TestModelWithTools(unittest.TestCase):
         answer: AIMessage = chain_sequential.invoke("call tool add(3,5) and Dot(2,7)")
         self.assertEquals(len(answer.tool_calls), 1)
 
-    @unittest.expectedFailure
     def test_specific_parallel_tool_choice(self):
-        """gpt-4.1-nano-2025-04-14 can not pass it. It calls just one tool"""
         chain_parallel = self.llm.bind_tools(
             tools=[add, Dot], tool_choice="add", parallel_tool_calls=True) | DeepseekR1JsonToolCallsParser()
 

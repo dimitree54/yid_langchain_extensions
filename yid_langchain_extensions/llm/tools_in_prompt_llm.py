@@ -6,7 +6,7 @@ from typing import Sequence, Union, Any, Callable, Optional
 from langchain_core.callbacks import CallbackManagerForLLMRun
 from langchain_core.exceptions import OutputParserException
 from langchain_core.language_models import LanguageModelInput, BaseChatModel
-from langchain_core.messages import BaseMessage, SystemMessage, AIMessage, ToolCall
+from langchain_core.messages import BaseMessage, SystemMessage, AIMessage, ToolCall, HumanMessage
 from langchain_core.output_parsers import JsonOutputParser, BaseCumulativeTransformOutputParser
 from langchain_core.outputs import ChatResult
 from langchain_core.runnables import Runnable
@@ -17,7 +17,7 @@ from pydantic import Field
 
 def add_tool_calls(base_input: LanguageModelInput, extra_message: str) -> LanguageModelInput:
     if isinstance(base_input, str):
-        return f"{base_input}\n\nSystem message:\n{extra_message}"
+        return [HumanMessage(content=base_input), SystemMessage(content=extra_message)]
     if isinstance(base_input, list):
         return base_input + [SystemMessage(content=extra_message)]
     raise NotImplementedError
@@ -169,7 +169,7 @@ Example of tools calling:
     {
         "name": "tool2_name",
         "arguments": {
-            "optional_arg_name: null,
+            "optional_arg_name": null,
             "str_arg_name": "str_value"
         }
     },
@@ -185,7 +185,7 @@ Example of tool calling:
     "arguments": {
         "int_arg_name": int_value,
         "bool_arg_name": true,
-        "optional_arg_name: null,
+        "optional_arg_name": null,
         "str_arg_name": "str_value"
     }
 }
