@@ -30,10 +30,10 @@ class TestModelWithTools(unittest.TestCase):
     def test_auto_sequential_tool_choice(self):
         chain_sequential = self.llm.bind_tools(
             tools=[add, Dot], tool_choice="auto") | DeepseekR1JsonToolCallsParser()
-        
+
         answer: AIMessage = chain_sequential.invoke("hi")
         self.assertEquals(len(answer.tool_calls), 0)
-        
+
         answer: AIMessage = chain_sequential.invoke("call tool add(3,5)")
         self.assertEquals(len(answer.tool_calls), 1)
         self.assertEquals(answer.tool_calls[0]["name"], "add")
@@ -55,17 +55,17 @@ class TestModelWithTools(unittest.TestCase):
         """gpt-4.1-nano-2025-04-14 can not pass it. It answers directly, instead of calling one of tools as requested"""
         chain_parallel = self.llm.bind_tools(
             tools=[add, Dot], tool_choice="auto", parallel_tool_calls=True) | DeepseekR1JsonToolCallsParser()
-        
+
         answer: AIMessage = chain_parallel.invoke("hi")
         self.assertEquals(len(answer.tool_calls), 0)
-        
+
         answer: AIMessage = chain_parallel.invoke("call tool add(3,5)")
         self.assertEquals(len(answer.tool_calls), 1)
         self.assertEquals(answer.tool_calls[0]["name"], "add")
         self.assertEquals(answer.tool_calls[0]["args"].get("a"), 3)
         self.assertEquals(answer.tool_calls[0]["args"].get("b"), 5)
         self.assertIsNotNone(answer.tool_calls[0]["id"])
-        
+
         answer: AIMessage = chain_parallel.invoke("call tool add(3,5) and Dot(2,7)")
         self.assertEquals(len(answer.tool_calls), 2)
         self.assertEquals(answer.tool_calls[0]["name"], "add")
@@ -80,11 +80,11 @@ class TestModelWithTools(unittest.TestCase):
 
     def test_any_sequential_tool_choice(self):
         chain_sequential = self.llm.bind_tools(tools=[add, Dot], tool_choice="any") | DeepseekR1JsonToolCallsParser()
-        
+
         answer: AIMessage = chain_sequential.invoke("hi")
         self.assertEquals(len(answer.tool_calls), 1)
         self.assertEquals(answer.tool_calls[0]["name"], "add")
-        
+
         answer: AIMessage = chain_sequential.invoke("call tool add(3,5)")
         self.assertEquals(len(answer.tool_calls), 1)
         self.assertEquals(answer.tool_calls[0]["name"], "add")
@@ -105,7 +105,7 @@ class TestModelWithTools(unittest.TestCase):
         self.assertEquals(answer.tool_calls[0]["args"].get("a"), 3)
         self.assertEquals(answer.tool_calls[0]["args"].get("b"), 5)
         self.assertIsNotNone(answer.tool_calls[0]["id"])
-        
+
         answer: AIMessage = chain_parallel.invoke("call tool add(3,5) and Dot(2,7)")
         self.assertEquals(len(answer.tool_calls), 2)
         self.assertEquals(answer.tool_calls[0]["name"], "add")

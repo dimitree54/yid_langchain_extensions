@@ -1,5 +1,4 @@
 import secrets
-import secrets
 import string
 import typing
 from typing import Sequence, Union, Any, Callable, Optional
@@ -151,7 +150,8 @@ class ModelWithPromptIntroducedTools(BaseChatModel):
         tools_intro = f"You have access to {len(formatted_tools)} tools with following schemas:\n"
         for tool_name, formatted_tool in formatted_tools.items():
             tools_intro += f"{formatted_tool}\n"
-        tools_intro += (f"\n{suffix}\nHint: before actually calling the tool, think well, how are you going to call it. "
+        tools_intro += (f"\n{suffix}\nHint: before actually calling the tool,"
+                        f" think well, how are you going to call it. "
                         f"During thinking, make sure you precisely follow the tool schema!!! ")
 
         if parallel_tool_calls:
