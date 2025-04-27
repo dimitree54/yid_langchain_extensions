@@ -51,20 +51,23 @@ class DeepseekR1JsonToolCallsParser(BaseCumulativeTransformOutputParser[Any]):
         thoughts, output = split_thinking_and_output(text)
         try:
             raw_tool_calls = self.base_json_parser.parse(output)
-        except OutputParserException:
-            return AIMessage(content=output, additional_kwargs={"thoughts": thoughts})
+        except OutputParserException as e:
+            return AIMessage(content=output, additional_kwargs={"thoughts": thoughts, "parsing_error": str(e)})
         if isinstance(raw_tool_calls, dict):
             raw_tool_calls = [raw_tool_calls]
 
         tool_calls = []
-        for raw_tool_call in raw_tool_calls:
-            tool_calls.append(
-                ToolCall(
-                    name=raw_tool_call["name"],
-                    args=raw_tool_call["arguments"],
-                    id=generate_call_id()
+        try:
+            for raw_tool_call in raw_tool_calls:
+                tool_calls.append(
+                    ToolCall(
+                        name=raw_tool_call["name"],
+                        args=raw_tool_call["arguments"],
+                        id=generate_call_id()
+                    )
                 )
-            )
+        except KeyError as e:
+            return AIMessage(content=output, additional_kwargs={"thoughts": thoughts, "parsing_error": str(e)})
         return AIMessage(content="", additional_kwargs={"thoughts": thoughts}, tool_calls=tool_calls)
 
 
