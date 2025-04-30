@@ -1,6 +1,7 @@
 import unittest
 
-from langchain_core.messages import AIMessage
+from langchain_core.messages import AIMessage, HumanMessage
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
@@ -26,6 +27,20 @@ class TestModelWithTools(unittest.TestCase):
         # actually o4-mini supports tools out of the box, but it is easiest to set up as example
         test_llm = ChatOpenAI(model_name="o4-mini-2025-04-16")
         self.llm = ModelWithPromptIntroducedTools.wrap_model(base_model=test_llm)
+
+    async def test_with_chat_messages_async(self):
+        chain_sequential = self.llm.bind_tools(
+            tools=[add, Dot], tool_choice="auto") | DeepseekR1JsonToolCallsParser()
+
+        answer: AIMessage = await chain_sequential.ainvoke([HumanMessage(content="hi")])
+        self.assertEqual(len(answer.tool_calls), 0)
+
+    def test_with_prompt_template(self):
+        prompt = ChatPromptTemplate.from_messages([HumanMessage(content="{message}")])
+        chain_sequential = prompt | self.llm.bind_tools(
+            tools=[add, Dot], tool_choice="auto") | DeepseekR1JsonToolCallsParser()
+        answer: AIMessage = chain_sequential.invoke(input={"message": "hi"})
+        self.assertEqual(len(answer.tool_calls), 0)
 
     def test_auto_sequential_tool_choice(self):
         chain_sequential = self.llm.bind_tools(
