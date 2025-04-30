@@ -9,6 +9,7 @@ from langchain_core.language_models import LanguageModelInput, BaseChatModel
 from langchain_core.messages import BaseMessage, SystemMessage, AIMessage, ToolCall, HumanMessage
 from langchain_core.output_parsers import JsonOutputParser, BaseCumulativeTransformOutputParser
 from langchain_core.outputs import ChatResult
+from langchain_core.prompt_values import ChatPromptValue
 from langchain_core.runnables import Runnable
 from langchain_core.tools import BaseTool
 from langchain_core.utils.function_calling import convert_to_openai_tool
@@ -20,7 +21,10 @@ def add_tool_calls(base_input: LanguageModelInput, extra_message: str) -> Langua
         return [HumanMessage(content=base_input), SystemMessage(content=extra_message)]
     if isinstance(base_input, list):
         return base_input + [SystemMessage(content=extra_message)]
-    raise NotImplementedError
+    if isinstance(base_input, ChatPromptValue):
+        base_input.messages.append(SystemMessage(content=extra_message))
+        return base_input
+    raise NotImplementedError(f"type {type(base_input)} not supported")
 
 
 def split_thinking_and_output(text: str) -> (str, str):
