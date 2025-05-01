@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 from langchain_core.messages import HumanMessage
 from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 
 from yid_langchain_extensions.llm.batches_openai_client import BatchesOpenAICompletions
@@ -10,11 +11,14 @@ from yid_langchain_extensions.utils import encode_image_to_url
 
 
 class TestBatchesClient(unittest.IsolatedAsyncioTestCase):
-    async def test_batches_client_in_chain(self):
+    def setUp(self) -> None:
         batches_client = BatchesOpenAICompletions()
-        llm = ChatOpenAI(async_client=batches_client)
-        chain = llm | StrOutputParser()
-        answer = await chain.ainvoke(input=[HumanMessage(content="hi")])
+        self.llm = ChatOpenAI(model_name="gpt-4.1-nano", temperature=0, async_client=batches_client)
+
+    async def test_batches_client_in_chain(self):
+        prompt = ChatPromptTemplate.from_messages([HumanMessage(content="{message}")])
+        chain = prompt | self.llm | StrOutputParser()
+        answer = await chain.ainvoke(input={"message": "hi"})
         self.assertTrue(len(answer) > 0)
 
     def generate_random_image(self):
@@ -22,9 +26,7 @@ class TestBatchesClient(unittest.IsolatedAsyncioTestCase):
         return random_image_array
 
     async def test_batches_client_with_inline_image(self):
-        batches_client = BatchesOpenAICompletions()
-        llm = ChatOpenAI(model_name="gpt-4o", async_client=batches_client)
-        chain = llm | StrOutputParser()
+        chain = self.llm | StrOutputParser()
 
         content = [
             {'type': 'text', 'text': 'hi'},
@@ -37,9 +39,7 @@ class TestBatchesClient(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(len(answer) > 0)
 
     async def test_batches_client_with_online_image(self):
-        batches_client = BatchesOpenAICompletions()
-        llm = ChatOpenAI(model_name="gpt-4o", async_client=batches_client)
-        chain = llm | StrOutputParser()
+        chain = self.llm | StrOutputParser()
 
         url = ("https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/"
                "Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg")
