@@ -11,6 +11,7 @@ from langchain.tools import BaseTool
 from yid_langchain_extensions.agent.raw_output_agent_executor import AgentWithThoughtsExecutor
 
 
+# todo remove as outdated
 class SimpleAgent(Agent):
     prompt: ChatPromptTemplate
     stop_sequences: List[str]
