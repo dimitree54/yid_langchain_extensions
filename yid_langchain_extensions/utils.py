@@ -1,6 +1,6 @@
 import base64
 from abc import ABC, abstractmethod
-from typing import Type, Any, Dict, Union, Callable, Optional, Sequence, List
+from typing import Dict, Union, Optional, Sequence, List
 
 import cv2
 import numpy as np
@@ -8,49 +8,13 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import BaseMessage
 from langchain_core.prompt_values import ChatPromptValue
 from langchain_core.runnables import RunnableConfig, Runnable
-from langchain_core.tools import BaseTool
 from langchain_core.utils.function_calling import _rm_titles, convert_to_openai_function, convert_to_openai_tool  # noqa
-from langchain_core.utils.json_schema import dereference_refs
 from pydantic import BaseModel
-
-
-def convert_pydantic_to_openai_function_v2(
-        model: Type[BaseModel],
-) -> Dict[str, Any]:
-    schema = dereference_refs(model.model_json_schema())
-    schema.pop("definitions", None)
-    title = schema.pop("title", "")
-    default_description = schema.pop("description", "")
-    return {
-        "name": title,
-        "description": default_description,
-        "parameters": _rm_titles(schema)
-    }
-
-
-def convert_to_openai_function_v2(
-    function: Union[Dict[str, Any], Type[BaseModel], Callable, BaseTool],
-) -> Dict[str, Any]:
-    if isinstance(function, type) and issubclass(function, BaseModel):
-        return convert_pydantic_to_openai_function_v2(function)
-    else:
-        return convert_to_openai_function(function)
-
-
-def convert_to_openai_tool_v2(
-        tool: Union[Dict[str, Any], Type[BaseModel], Callable, BaseTool],
-) -> Dict[str, Any]:
-    if isinstance(tool, type) and issubclass(tool, BaseModel):
-        return convert_to_openai_tool(
-            convert_to_openai_function_v2(tool)
-        )
-    else:
-        return convert_to_openai_tool(tool)
 
 
 class ChatPromptValue2DictAdapter(Runnable[Union[ChatPromptValue, Dict], Dict[str, Sequence[BaseMessage]]]):
     def invoke(
-            self, input: Union[ChatPromptValue, Dict], config: Optional[RunnableConfig] = None  # noqa
+            self, input: Union[ChatPromptValue, Dict], config: Optional[RunnableConfig] = None
     ) -> Dict[str, Sequence[BaseMessage]]:
         if isinstance(input, Dict):
             return input
@@ -59,6 +23,7 @@ class ChatPromptValue2DictAdapter(Runnable[Union[ChatPromptValue, Dict], Dict[st
         }
 
 
+# todo refactor it to be runnable
 class ContextSizeLimiter(BaseModel, ABC):
     @abstractmethod
     def limit_messages(self, messages: List[BaseMessage]) -> List[BaseMessage]:

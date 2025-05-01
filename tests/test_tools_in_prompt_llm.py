@@ -28,11 +28,11 @@ class TestModelWithTools(unittest.TestCase):
         test_llm = ChatOpenAI(model_name="o4-mini-2025-04-16")
         self.llm = ModelWithPromptIntroducedTools.wrap_model(base_model=test_llm)
 
-    async def test_with_chat_messages_async(self):
+    def test_with_chat_messages(self):
         chain_sequential = self.llm.bind_tools(
             tools=[add, Dot], tool_choice="auto") | DeepseekR1JsonToolCallsParser()
 
-        answer: AIMessage = await chain_sequential.ainvoke([HumanMessage(content="hi")])
+        answer: AIMessage = chain_sequential.invoke([HumanMessage(content="hi")])
         self.assertEqual(len(answer.tool_calls), 0)
 
     def test_with_prompt_template(self):

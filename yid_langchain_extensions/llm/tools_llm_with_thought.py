@@ -5,10 +5,11 @@ from langchain_core.messages import AIMessage, AIMessageChunk
 from langchain_core.prompt_values import ChatPromptValue
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable, RunnableConfig, RunnablePassthrough
+from langchain_core.utils.function_calling import convert_to_openai_tool
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
 
-from yid_langchain_extensions.utils import convert_to_openai_tool_v2, ChatPromptValue2DictAdapter
+from yid_langchain_extensions.utils import ChatPromptValue2DictAdapter
 
 
 class ThoughtStripper(Runnable[AIMessageChunk, AIMessageChunk]):
@@ -65,7 +66,7 @@ def build_tools_llm_with_thought(
         thought_introducing_prompt: ChatPromptTemplate,
         thought_class: Type[BaseModel]
 ) -> Runnable[ChatPromptValue, AIMessage]:
-    thought_tool = convert_to_openai_tool_v2(thought_class)
+    thought_tool = convert_to_openai_tool(thought_class)
     all_tools = [thought_tool] + openai_tools
     llm_with_thought_tool = tools_llm.bind(tools=all_tools)
 
