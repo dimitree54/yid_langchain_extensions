@@ -19,7 +19,6 @@ jobs:
       run: |
         flake8
   tests:
-    needs: flake8
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
