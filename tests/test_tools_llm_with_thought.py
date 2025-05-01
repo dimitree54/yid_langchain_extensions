@@ -27,7 +27,7 @@ class TestToolsLLMWithThought(unittest.TestCase):
         ]
         base_prompt = hub.pull("hwchase17/openai-tools-agent")
         thought_prompt: ChatPromptTemplate = hub.pull("dimitree54/introduce_thought_tool")
-        llm = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0)  # noqa
+        llm = ChatOpenAI(model="gpt-4.1-nano", temperature=0)  # noqa
         llm_with_thought = build_tools_llm_with_thought(llm, tools, thought_prompt, Reasoning)
         extended_chain = base_prompt | llm_with_thought | PydanticOutputParser(
             pydantic_class=PowerFnArgsV2, base_parser=OpenAIToolsAgentOutputParser())
