@@ -32,11 +32,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
-    - name: Run unittest
+    - name: Run unittest in parallel
       env:
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       run: |
-        python -m unittest discover
+        python -m unittest_parallel -s tests
   bump-version:
     needs: tests
     if: github.ref == 'refs/heads/main'
