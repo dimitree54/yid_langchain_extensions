@@ -1,4 +1,6 @@
+import asyncio
 import unittest
+from typing import Tuple
 
 import numpy as np
 from langchain_core.messages import HumanMessage
@@ -10,52 +12,82 @@ from yid_langchain_extensions.llm.batches_openai_client import BatchesOpenAIComp
 from yid_langchain_extensions.utils import encode_image_to_url
 
 
-def build_llm():
-    batches_client = BatchesOpenAICompletions()
-    return ChatOpenAI(model_name="gpt-4.1-nano", temperature=0, async_client=batches_client)
+class TestBatchesClient(unittest.IsolatedAsyncioTestCase):
+    def setUp(self):
+        batches_client = BatchesOpenAICompletions()
+        self.llm = ChatOpenAI(model_name="gpt-4.1-nano", temperature=0, async_client=batches_client)
 
+    @staticmethod
+    def generate_random_image():
+        random_image_array = np.random.randint(0, 256, (128, 128, 3), dtype=np.uint8)
+        return random_image_array
 
-def generate_random_image():
-    random_image_array = np.random.randint(0, 256, (128, 128, 3), dtype=np.uint8)
-    return random_image_array
+    async def chain_with_text(self) -> Tuple[bool, str]:
+        """Test the batches client with text input in a chain."""
+        try:
+            prompt = ChatPromptTemplate.from_messages([HumanMessage(content="{message}")])
+            chain = prompt | self.llm | StrOutputParser()
+            answer = await chain.ainvoke(input={"message": "hi"})
+            return len(answer) > 0, "Text chain test passed"
+        except Exception as e:
+            return False, f"Text chain test failed: {str(e)}"
 
+    async def chain_with_inline_image(self) -> Tuple[bool, str]:
+        """Test the batches client with an inline image."""
+        try:
+            chain = self.llm | StrOutputParser()
 
-class TestBatchesClientInChain(unittest.IsolatedAsyncioTestCase):
-    async def test_batches_client_in_chain(self):
-        prompt = ChatPromptTemplate.from_messages([HumanMessage(content="{message}")])
-        chain = prompt | build_llm() | StrOutputParser()
-        answer = await chain.ainvoke(input={"message": "hi"})
-        self.assertTrue(len(answer) > 0)
+            content = [
+                {'type': 'text', 'text': 'hi'},
+                {'type': 'image_url', 'image_url': {
+                    'url': encode_image_to_url(self.generate_random_image())
+                }}
+            ]
 
+            answer = await chain.ainvoke(input=[HumanMessage(content=content)])
+            return len(answer) > 0, "Inline image test passed"
+        except Exception as e:
+            return False, f"Inline image test failed: {str(e)}"
 
-class TestBatchesClientWithInlineImage(unittest.IsolatedAsyncioTestCase):
-    async def test_batches_client_with_inline_image(self):
-        chain = build_llm() | StrOutputParser()
+    async def chain_with_online_image(self) -> Tuple[bool, str]:
+        """Test the batches client with an online image."""
+        try:
+            chain = self.llm | StrOutputParser()
 
-        content = [
-            {'type': 'text', 'text': 'hi'},
-            {'type': 'image_url', 'image_url': {
-                'url': encode_image_to_url(generate_random_image())
-            }}
+            url = ("https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/"
+                "Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg")
+
+            content = [
+                {'type': 'text', 'text': 'hi'},
+                {'type': 'image_url', 'image_url': {
+                    'url': url
+                }}
+            ]
+
+            answer = await chain.ainvoke(input=[HumanMessage(content=content)])
+            return len(answer) > 0, "Online image test passed"
+        except Exception as e:
+            return False, f"Online image test failed: {str(e)}"
+
+    async def test_batches_client(self):
+        """Main test function that runs all test cases concurrently."""
+        test_functions = [
+            self.chain_with_text,
+            self.chain_with_inline_image,
+            self.chain_with_online_image
         ]
-
-        answer = await chain.ainvoke(input=[HumanMessage(content=content)])
-        self.assertTrue(len(answer) > 0)
-
-
-class TestBatchesClientWithOnlineImage(unittest.IsolatedAsyncioTestCase):
-    async def test_batches_client_with_online_image(self):
-        chain = build_llm() | StrOutputParser()
-
-        url = ("https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/"
-               "Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg")
-
-        content = [
-            {'type': 'text', 'text': 'hi'},
-            {'type': 'image_url', 'image_url': {
-                'url': url
-            }}
-        ]
-
-        answer = await chain.ainvoke(input=[HumanMessage(content=content)])
-        self.assertTrue(len(answer) > 0)
+        
+        # Run all test functions concurrently
+        results = await asyncio.gather(*[test_func() for test_func in test_functions])
+        
+        # Check results and assert
+        all_passed = True
+        failed_tests = []
+        
+        for success, message in results:
+            if not success:
+                all_passed = False
+                failed_tests.append(message)
+        
+        # Assert all tests passed
+        self.assertTrue(all_passed, f"Some tests failed: {', '.join(failed_tests)}")
