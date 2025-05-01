@@ -29,14 +29,13 @@ jobs:
         python-version: 3.11
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
+        python -m pip install --upgrade pip setuptools wheel
         pip install -r requirements.txt
-        pip install -r requirements-dev.txt
-    - name: Run unittest
+    - name: Run tests in parallel
       env:
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       run: |
-        python -m unittest discover
+        python -m pytest -xvs -n 20
   bump-version:
     needs: tests
     if: github.ref == 'refs/heads/main'
@@ -63,7 +62,7 @@ jobs:
           python-version: 3.11
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
+          python -m pip install --upgrade pip setuptools wheel twine
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
       - name: Build and publish
