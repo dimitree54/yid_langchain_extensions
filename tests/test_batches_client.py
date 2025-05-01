@@ -55,7 +55,8 @@ class TestBatchesClient(unittest.IsolatedAsyncioTestCase):
             chain = self.llm | StrOutputParser()
 
             url = ("https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/"
-                "Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg")
+                   "Gfp-wisconsin-madison-the-nature-boardwalk.jpg/"
+                   "2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg")
 
             content = [
                 {'type': 'text', 'text': 'hi'},
@@ -76,18 +77,18 @@ class TestBatchesClient(unittest.IsolatedAsyncioTestCase):
             self.chain_with_inline_image,
             self.chain_with_online_image
         ]
-        
+
         # Run all test functions concurrently
         results = await asyncio.gather(*[test_func() for test_func in test_functions])
-        
+
         # Check results and assert
         all_passed = True
         failed_tests = []
-        
+
         for success, message in results:
             if not success:
                 all_passed = False
                 failed_tests.append(message)
-        
+
         # Assert all tests passed
         self.assertTrue(all_passed, f"Some tests failed: {', '.join(failed_tests)}")
