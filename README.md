@@ -18,14 +18,6 @@ pip install -e ".[dev]"
 
 ### Running Tests
 
-Tests can be run in parallel using unittest-parallel:
-
-```bash
-python -m unittest_parallel -s tests
-```
-
-### Running Tests Sequentially
-
 If you need to run tests sequentially, you can use the standard unittest module:
 
 ```bash
