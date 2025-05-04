@@ -65,7 +65,7 @@ class LLMWithParsingRetry(Runnable[LanguageModelInput, Any]):
     ) -> Output:
         aggregated_error = ""
         extended_input = input
-        for _ in range(self.max_retries):
+        for _ in range(self.max_retries + 1):
             llm_output = await self.llm.ainvoke(extended_input, config, **kwargs)
             try:
                 parser_output = await self.parser.ainvoke(llm_output, config, **kwargs)
