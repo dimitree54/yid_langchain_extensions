@@ -1,4 +1,3 @@
-import asyncio
 import unittest
 from typing import Tuple
 
@@ -22,7 +21,7 @@ class TestBatchesClient(unittest.IsolatedAsyncioTestCase):
         random_image_array = np.random.randint(0, 256, (128, 128, 3), dtype=np.uint8)
         return random_image_array
 
-    async def chain_with_text(self) -> Tuple[bool, str]:
+    async def test_chain_with_text(self) -> Tuple[bool, str]:
         """Test the batches client with text input in a chain."""
         try:
             prompt = ChatPromptTemplate.from_messages([HumanMessage(content="{message}")])
@@ -32,7 +31,7 @@ class TestBatchesClient(unittest.IsolatedAsyncioTestCase):
         except Exception as e:
             return False, f"Text chain test failed: {str(e)}"
 
-    async def chain_with_inline_image(self) -> Tuple[bool, str]:
+    async def test_chain_with_inline_image(self) -> Tuple[bool, str]:
         """Test the batches client with an inline image."""
         try:
             chain = self.llm | StrOutputParser()
@@ -49,7 +48,7 @@ class TestBatchesClient(unittest.IsolatedAsyncioTestCase):
         except Exception as e:
             return False, f"Inline image test failed: {str(e)}"
 
-    async def chain_with_online_image(self) -> Tuple[bool, str]:
+    async def test_chain_with_online_image(self) -> Tuple[bool, str]:
         """Test the batches client with an online image."""
         try:
             chain = self.llm | StrOutputParser()
@@ -69,26 +68,3 @@ class TestBatchesClient(unittest.IsolatedAsyncioTestCase):
             return len(answer) > 0, "Online image test passed"
         except Exception as e:
             return False, f"Online image test failed: {str(e)}"
-
-    async def test_batches_client(self):
-        """Main test function that runs all test cases concurrently."""
-        test_functions = [
-            self.chain_with_text,
-            self.chain_with_inline_image,
-            self.chain_with_online_image
-        ]
-
-        # Run all test functions concurrently
-        results = await asyncio.gather(*[test_func() for test_func in test_functions])
-
-        # Check results and assert
-        all_passed = True
-        failed_tests = []
-
-        for success, message in results:
-            if not success:
-                all_passed = False
-                failed_tests.append(message)
-
-        # Assert all tests passed
-        self.assertTrue(all_passed, f"Some tests failed: {', '.join(failed_tests)}")

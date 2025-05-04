@@ -6,3 +6,4 @@
 /.idea/vcs.xml
 /.idea/yid_langchain_extensions.iml
 /.env
+/yid_langchain_extensions.egg-info/**
