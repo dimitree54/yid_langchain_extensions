@@ -16,7 +16,7 @@ class Dot(BaseModel):
 
 class TestRetryingLLM(unittest.TestCase):
     def setUp(self):
-        self.llm = ChatOpenAI(model="gpt-4.1-mini", temperature=0)
+        self.llm = ChatOpenAI(model_name="gpt-4.1-mini", temperature=0)
 
     def test_with_chat_messages(self):
         retrying_llm = LLMWithParsingRetry(
@@ -26,4 +26,19 @@ class TestRetryingLLM(unittest.TestCase):
         )
 
         answer: AIMessage = retrying_llm.invoke([HumanMessage(content="return json call of function Dot(2,7)")])
+        self.assertEqual(answer, Dot(a=2, b=7))
+
+
+class TestRetryingLLMAsync(unittest.IsolatedAsyncioTestCase):
+    def setUp(self):
+        self.llm = ChatOpenAI(model_name="gpt-4.1-mini", temperature=0)
+
+    async def test_with_chat_messages(self):
+        retrying_llm = LLMWithParsingRetry(
+            llm=self.llm,
+            parser=PydanticOutputParser(pydantic_object=Dot),
+            max_retries=3
+        )
+
+        answer: AIMessage = await retrying_llm.ainvoke([HumanMessage(content="return json call of function Dot(2,7)")])
         self.assertEqual(answer, Dot(a=2, b=7))

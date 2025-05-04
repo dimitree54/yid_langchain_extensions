@@ -24,16 +24,20 @@ class LLMWithParsingRetry(Runnable[LanguageModelInput, Any]):
     ) -> LanguageModelInput:
         error_message = f"Output parsing error: {error_message}, try again, but follow instructions carefully."
         if isinstance(input, str):
-            bad_rsult_str = bad_result if isinstance(bad_result, str) else bad_result.content
-            return input + "\n\n" + f"AI: {bad_rsult_str}" + "\n\n" + error_message
+            bad_result_str = bad_result if isinstance(bad_result, str) else bad_result.content
+            return input + "\n\n" + f"AI: {bad_result_str}" + "\n\n" + error_message
         bad_result_message = bad_result if isinstance(bad_result, AIMessage) else AIMessage(content=bad_result.content)
 
         error_messages = []
         if bad_result_message.tool_calls:
+            # some llms require all tool calls to have a result:
             for tool_call in bad_result_message.tool_calls:
-                error_messages.append(ToolMessage(tool_call_id=tool_call["id"], content=error_message))
-        else:
-            error_messages.append(SystemMessage(content=error_message))
+                error_messages.append(
+                    ToolMessage(
+                        tool_call_id=tool_call["id"],
+                        content="tool call failed because of parsing error (check further)")
+                )
+        error_messages.append(SystemMessage(content=error_message))
         if isinstance(input, list):
             return input + [bad_result_message] + error_messages
         elif isinstance(input, ChatPromptValue):
@@ -62,7 +66,7 @@ class LLMWithParsingRetry(Runnable[LanguageModelInput, Any]):
         aggregated_error = ""
         extended_input = input
         for _ in range(self.max_retries):
-            llm_output = self.llm.invoke(extended_input, config, **kwargs)
+            llm_output = await self.llm.ainvoke(extended_input, config, **kwargs)
             try:
                 parser_output = await self.parser.ainvoke(llm_output, config, **kwargs)
                 return parser_output
