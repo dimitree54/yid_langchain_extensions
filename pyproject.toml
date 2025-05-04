@@ -44,4 +44,8 @@ Homepage = "https://github.com/dimitree54/yid_langchain_extensions"
 Repository = "https://github.com/dimitree54/yid_langchain_extensions"
 
 [tool.setuptools]
-packages = ["yid_langchain_extensions"] 
+packages = ["yid_langchain_extensions"]
+find_namespace = false
+
+[tool.setuptools.packages.find]
+include = ["yid_langchain_extensions*"]
