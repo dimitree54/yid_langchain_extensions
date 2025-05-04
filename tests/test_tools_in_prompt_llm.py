@@ -24,8 +24,8 @@ class Dot(BaseModel):
 
 class TestModelWithTools(unittest.TestCase):
     def setUp(self):
-        # actually o4-mini supports tools out of the box, but it is easiest to set up as example
-        test_llm = ChatOpenAI(model_name="o4-mini-2025-04-16")
+        # actually o4-mini supports tools out of the box, but it is easiest to set up as an example
+        test_llm = ChatOpenAI(model_name="o4-mini-2025-04-16", model_kwargs={"service_tier": "flex"})
         self.llm = ModelWithPromptIntroducedTools.wrap_model(base_model=test_llm)
 
     def test_with_chat_messages(self):
