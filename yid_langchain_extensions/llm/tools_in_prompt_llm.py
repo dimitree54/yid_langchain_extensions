@@ -1,3 +1,4 @@
+import copy
 import secrets
 import string
 import typing
@@ -22,8 +23,9 @@ def add_tool_calls(base_input: LanguageModelInput, extra_message: str) -> Langua
     if isinstance(base_input, list):
         return base_input + [SystemMessage(content=extra_message)]
     if isinstance(base_input, ChatPromptValue):
-        base_input.messages.append(SystemMessage(content=extra_message))
-        return base_input
+        base_input_copy = copy.deepcopy(base_input)
+        base_input_copy.messages.append(SystemMessage(content=extra_message))
+        return base_input_copy
     raise NotImplementedError(f"type {type(base_input)} not supported")
 
 
