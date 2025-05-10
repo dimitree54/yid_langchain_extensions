@@ -46,7 +46,7 @@ jobs:
         source .venv/bin/activate
         python -m pytest -xvs -n 20
   bump-version:
-    needs: tests
+    needs: [tests, flake8]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
