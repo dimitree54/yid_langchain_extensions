@@ -52,13 +52,17 @@ def generate_call_id(length: int = 24, prefix: str = "call_") -> str:
 
 class DeepseekR1JsonToolCallsParser(BaseCumulativeTransformOutputParser[Any]):
     base_json_parser: JsonOutputParser = Field(default_factory=JsonOutputParser)
+    raise_if_cannot_parse: bool = False
 
     def parse(self, text: str) -> AIMessage:
         thoughts, output = split_thinking_and_output(text)
         try:
             raw_tool_calls = self.base_json_parser.parse(output)
         except OutputParserException as e:
-            return AIMessage(content=output, additional_kwargs={"thoughts": thoughts, "parsing_error": str(e)})
+            if self.raise_if_cannot_parse:
+                raise e
+            else:
+                return AIMessage(content=output, additional_kwargs={"thoughts": thoughts, "parsing_error": str(e)})
         if isinstance(raw_tool_calls, dict):
             raw_tool_calls = [raw_tool_calls]
 
@@ -73,7 +77,10 @@ class DeepseekR1JsonToolCallsParser(BaseCumulativeTransformOutputParser[Any]):
                     )
                 )
         except KeyError as e:
-            return AIMessage(content=output, additional_kwargs={"thoughts": thoughts, "parsing_error": str(e)})
+            if self.raise_if_cannot_parse:
+                raise OutputParserException(f"Expected key not found in output json: {str(e)}")
+            else:
+                return AIMessage(content=output, additional_kwargs={"thoughts": thoughts, "parsing_error": str(e)})
         return AIMessage(content="", additional_kwargs={"thoughts": thoughts}, tool_calls=tool_calls)
 
 
